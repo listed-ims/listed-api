@@ -14,9 +14,9 @@ import java.util.Map;
 @ControllerAdvice
 public class ControllerAdvisor extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(EntityNotFoundException.class)
+    @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Object> handleEntityNotFoundException(
-            EntityNotFoundException exception,
+            NotFoundException exception,
             WebRequest request
     ) {
         Map<String, Object> body = new LinkedHashMap<>();

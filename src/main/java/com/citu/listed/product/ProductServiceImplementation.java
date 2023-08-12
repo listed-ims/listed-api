@@ -1,6 +1,6 @@
 package com.citu.listed.product;
 
-import com.citu.listed.exception.EntityNotFoundException;
+import com.citu.listed.exception.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -48,6 +48,6 @@ public class ProductServiceImplementation implements ProductService{
         Optional<Product> product = productRepository.findById(id);
 
         return product.map(productResponseMapper)
-                .orElseThrow(() -> new EntityNotFoundException("Product not found."));
+                .orElseThrow(() -> new NotFoundException("Product not found."));
     }
 }
