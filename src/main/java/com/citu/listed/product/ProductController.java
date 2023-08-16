@@ -1,5 +1,6 @@
 package com.citu.listed.product;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,5 +33,11 @@ public class ProductController {
     @GetMapping("/{id}")
     public ResponseEntity<Object> getProduct(@PathVariable Integer id) {
         return new ResponseEntity<>(productService.getProduct(id), HttpStatus.OK);
+    }
+
+    @PostMapping("")
+    public ResponseEntity<Object> addNewProduct(@RequestBody @Valid Product product) {
+        productService.addNewProduct(product);
+        return new ResponseEntity<>("Product created.", HttpStatus.CREATED);
     }
 }

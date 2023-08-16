@@ -12,4 +12,5 @@ public interface ProductService {
             int pageSize
     );
     ProductResponse getProduct(Integer id);
+    void addNewProduct(Product product);
 }
