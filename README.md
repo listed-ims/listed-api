@@ -50,7 +50,7 @@ com
 
 We encourage contributors to follow the suggested GitHub workflow when contributing to this repository. Make sure to:
 
-1. Create a new branch for your feature/fix/misc.
+1. Create a new branch for your feat/fix/misc.
 3. Commit your changes with descriptive messages.
 4. Push your changes to your branch.
 5. Submit a pull request to the repository's main branch.
