@@ -1,8 +1,6 @@
 package com.citu.listed.product;
 
-import com.citu.listed.exception.BadRequestException;
 import com.citu.listed.exception.NotFoundException;
-import jakarta.validation.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
