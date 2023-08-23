@@ -13,7 +13,12 @@ public class UserController {
     @Autowired
     private UserService service;
 
-
+    @PostMapping("/register")
+    public ResponseEntity<AuthenticationResponse> register(
+            @RequestBody RegisterRequest request
+    ){
+        return new ResponseEntity<>(service.register(request), HttpStatus.CREATED);
+    }
 
     @PostMapping("/login")
     public ResponseEntity<AuthenticationResponse> authenticate(
