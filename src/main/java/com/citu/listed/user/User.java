@@ -26,7 +26,6 @@ public class User implements UserDetails{
     private String username;
 
     @Column
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     @Builder
@@ -36,7 +35,6 @@ public class User implements UserDetails{
         this.password = password;
     }
 
-//    User Details Methods
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return null;
