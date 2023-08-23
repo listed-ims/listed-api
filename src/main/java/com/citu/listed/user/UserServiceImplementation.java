@@ -1,5 +1,6 @@
 package com.citu.listed.user;
 
+import com.citu.listed.exception.BadRequestException;
 import com.citu.listed.user.config.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,7 +20,22 @@ public class UserServiceImplementation implements UserService{
 
     private final AuthenticationManager authenticationManager;
 
-
+    public AuthenticationResponse register(RegisterRequest request){
+        var user = User.builder()
+                .name(request.getName())
+                .username(request.getUsername())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .build();
+        if (validateUsername(user.getUsername())) {
+            userRepository.save(user);
+            var jwtToken = jwtService.generateToken(user);
+            return AuthenticationResponse.builder()
+                    .token(jwtToken)
+                    .build();
+        } else {
+            throw new BadRequestException("Username is already taken.");
+        }
+    }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request){
         authenticationManager.authenticate(
@@ -34,5 +50,9 @@ public class UserServiceImplementation implements UserService{
         return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .build();
+    }
+
+    public boolean validateUsername(String username){
+        return userRepository.findByUsername(username).isEmpty();
     }
 }
