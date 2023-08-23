@@ -7,7 +7,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
 @Service
 @RequiredArgsConstructor
@@ -54,10 +53,6 @@ public class UserServiceImplementation implements UserService{
     }
 
     public boolean validateUsername(String username){
-        if(userRepository.findByUsername(username).isEmpty()){
-            return true;
-        } else{
-            return false;
-        }
+        return userRepository.findByUsername(username).isEmpty();
     }
 }
