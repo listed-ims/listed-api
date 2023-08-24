@@ -1,9 +1,13 @@
 package com.citu.listed.store;
 
+import com.citu.listed.membership.Membership;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+
+import java.util.List;
 
 @Entity
 @Table(name = "stores")
@@ -24,6 +28,10 @@ public class Store {
     @NotNull(message = "Store status is required.")
     @Enumerated(EnumType.STRING)
     private StoreStatus status;
+
+    @OneToMany(mappedBy = "store")
+    @JsonIgnore
+    private List<Membership> members;
 
     @Builder
     public Store(String name, StoreStatus status) {
