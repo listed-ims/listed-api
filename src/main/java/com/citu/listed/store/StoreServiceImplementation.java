@@ -8,7 +8,12 @@ import com.citu.listed.user.UserRepository;
 import com.citu.listed.user.config.JwtService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class StoreServiceImplementation implements StoreService {
@@ -24,6 +29,33 @@ public class StoreServiceImplementation implements StoreService {
 
     @Autowired
     private JwtService jwtService;
+
+    @Autowired
+    private StoreResponseMapper storeResponseMapper;
+
+    @Override
+    public List<StoreResponse> getStores(
+            String token,
+            StoreStatus status,
+            int pageNumber,
+            int pageSize
+    ) {
+        User user = userRepository.findByUsername(jwtService.extractUsername(token))
+                .orElseThrow(() -> new NotFoundException("User not found."));
+
+        List<Store> stores;
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
+
+        if(status == null) {
+            stores = storeRepository.findAllByMembersUser(user, pageable);
+        } else {
+            stores = storeRepository.findAllByMembersUserAndStatus(user, status, pageable);
+        }
+
+        return stores.stream()
+                .map(storeResponseMapper)
+                .collect(Collectors.toList());
+    }
 
     @Override
     @Transactional
@@ -43,4 +75,5 @@ public class StoreServiceImplementation implements StoreService {
 
         membershipRepository.save(membership);
     }
+
 }
