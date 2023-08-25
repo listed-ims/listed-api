@@ -33,6 +33,11 @@ public class StoreController {
         );
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Object> getStore(@PathVariable Integer id) {
+        return new ResponseEntity<>(storeService.getStore(id), HttpStatus.OK);
+    }
+
     @PostMapping("")
     public ResponseEntity<Object> createStore(
             @RequestHeader HttpHeaders headers,

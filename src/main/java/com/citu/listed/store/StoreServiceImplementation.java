@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -55,6 +56,14 @@ public class StoreServiceImplementation implements StoreService {
         return stores.stream()
                 .map(storeResponseMapper)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public StoreResponse getStore(Integer id) {
+        Optional<Store> store = storeRepository.findById(id);
+
+        return store.map(storeResponseMapper)
+                .orElseThrow(() -> new NotFoundException("Store not found."));
     }
 
     @Override

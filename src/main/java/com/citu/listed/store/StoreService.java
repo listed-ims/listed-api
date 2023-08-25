@@ -9,5 +9,6 @@ public interface StoreService {
             StoreStatus status,
             int pageNumber,
             int pageSize);
+    StoreResponse getStore(Integer id);
     void createStore(String token, Store store);
 }
