@@ -1,6 +1,7 @@
 package com.citu.listed.product;
 
 import com.citu.listed.store.Store;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -40,24 +41,25 @@ public class Product {
     private Double salePrice;
 
     @Column
-    private Integer threshold;
+    private Double  threshold;
 
     @Column
     @NotNull(message = "Unit is required.")
     @Enumerated(EnumType.STRING)
     private ProductUnit unit;
 
+    @JsonIgnore
     @ManyToOne
-    @NotNull(message = "Store is required.")
-    @JoinColumn(name = "store_id")
+    @JoinColumn(name = "store_id", nullable = false)
     private Store store;
 
+    @JsonIgnore
     @Column
     private Boolean deleted;
 
     @Builder
     public Product(String name, String barcode, String variant, Double salePrice,
-                   Integer threshold, ProductUnit unit, Store store) {
+                   Double threshold, ProductUnit unit, Store store) {
         this.name = name;
         this.barcode = barcode;
         this.variant = variant;
