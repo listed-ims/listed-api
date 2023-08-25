@@ -17,9 +17,9 @@ public class ProductResponseMapper implements Function<Product, ProductResponse>
                 product.getSalePrice(),
                 product.getThreshold(),
                 product.getUnit(),
-                0,
-                0,
-                0
+                0.0,
+                0.0,
+                0.0
         );
     }
 

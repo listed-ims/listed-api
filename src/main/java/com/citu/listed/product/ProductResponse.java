@@ -6,10 +6,10 @@ public record ProductResponse(
         String barcode,
         String variant,
         Double salePrice,
-        Integer threshold,
+        Double threshold,
         ProductUnit unit,
-        Integer totalQuantity,
-        Integer totalIn,
-        Integer totalOut
+        Double totalQuantity,
+        Double totalIn,
+        Double totalOut
 ) {
 }
