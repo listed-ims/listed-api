@@ -1,7 +1,5 @@
 package com.citu.listed.product;
 
-import com.citu.listed.store.Store;
-
 import java.util.List;
 
 public interface ProductService {
@@ -15,5 +13,5 @@ public interface ProductService {
     );
     ProductResponse getProduct(Integer id);
     void addNewProduct(Integer storeId, Product product);
-    boolean validateBarcode(Store store, String barcode);
+    boolean validateBarcode(Integer storeId, String barcode);
 }

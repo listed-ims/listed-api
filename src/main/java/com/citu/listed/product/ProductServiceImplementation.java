@@ -36,15 +36,13 @@ public class ProductServiceImplementation implements ProductService{
             int pageNumber,
             int pageSize
     ) {
-        Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new NotFoundException("Store not found."));
         List<Product> products;
 
         if(barcode.isEmpty()) {
             Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(sort));
-            products = productRepository.findByStore(store.getId(), filter.trim(), pageable);
+            products = productRepository.findByStoreId(storeId, filter.trim(), pageable);
         } else {
-            products = productRepository.findByStoreAndBarcode(store, barcode);
+            products = productRepository.findByStoreIdAndBarcode(storeId, barcode);
         }
 
         return products.stream()
@@ -67,7 +65,7 @@ public class ProductServiceImplementation implements ProductService{
 
         if(store.getStatus() != StoreStatus.OPEN)
             throw new BadRequestException("Store is CLOSED. Cannot add new product.");
-        else if(!validateBarcode(store, product.getBarcode()))
+        else if(!validateBarcode(store.getId(), product.getBarcode()))
             throw new BadRequestException("Barcode must be unique.");
 
         Product newProduct = Product.builder()
@@ -83,9 +81,11 @@ public class ProductServiceImplementation implements ProductService{
         productRepository.save(newProduct);
     }
 
-    @Override
-    public boolean validateBarcode(Store store, String barcode) {
-        return productRepository.findByStoreAndBarcode(store, barcode).isEmpty();
+    public boolean validateBarcode(Integer storeId, String barcode) {
+        if (barcode == null || barcode.isEmpty())
+            return true;
+        else
+            return productRepository.findByStoreIdAndBarcode(storeId, barcode).isEmpty();
     }
 
     private Double validateThreshold(ProductUnit unit, Double threshold) {
