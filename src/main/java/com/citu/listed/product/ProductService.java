@@ -1,7 +1,5 @@
 package com.citu.listed.product;
 
-import com.citu.listed.store.Store;
-
 import java.util.List;
 
 public interface ProductService {
