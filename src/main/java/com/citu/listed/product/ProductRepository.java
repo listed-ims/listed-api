@@ -16,6 +16,6 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
             "(p.name LIKE CONCAT('%',:filter, '%') " +
             "Or p.variant LIKE CONCAT('%', :filter, '%')) " +
             "And p.store.id = :storeId ")
-    List<Product> findByStore(Integer storeId, String filter, Pageable pageable);
-    List<Product> findByStoreAndBarcode(Store store, String barcode);
+    List<Product> findByStoreId(Integer storeId, String filter, Pageable pageable);
+    List<Product> findByStoreIdAndBarcode(Integer storeId, String barcode);
 }
