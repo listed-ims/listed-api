@@ -1,5 +1,6 @@
 package com.citu.listed.product;
 
+import com.citu.listed.shared.ValidationResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -42,5 +43,16 @@ public class ProductController {
     ) {
         productService.addNewProduct(storeId, product);
         return new ResponseEntity<>("Product created.", HttpStatus.CREATED);
+    }
+
+    @PostMapping("/validation/barcode")
+    public ResponseEntity<Object> getProduct(
+            @RequestParam Integer storeId,
+            @RequestParam String barcode
+    ) {
+        return new ResponseEntity<>(
+                new ValidationResponse(productService.validateBarcode(storeId, barcode)),
+                HttpStatus.OK
+        );
     }
 }
