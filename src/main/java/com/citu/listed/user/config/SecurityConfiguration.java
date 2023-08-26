@@ -26,7 +26,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests()
                 .requestMatchers("/listed/api/login").permitAll()
                 .requestMatchers("/listed/api/register").permitAll()
-                .requestMatchers("/listed/api/validation/username").permitAll()
+                .requestMatchers("/listed/api/users/validation/username").permitAll()
                 .requestMatchers("/v2/api/docs").permitAll()
                 .requestMatchers("/v3/api/docs").permitAll()
                 .requestMatchers("/v3/api-docs/**").permitAll()
