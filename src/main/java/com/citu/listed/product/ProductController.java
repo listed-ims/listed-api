@@ -36,8 +36,11 @@ public class ProductController {
     }
 
     @PostMapping("")
-    public ResponseEntity<Object> addNewProduct(@RequestBody @Valid Product product) {
-        productService.addNewProduct(product);
+    public ResponseEntity<Object> addNewProduct(
+            @RequestParam Integer storeId,
+            @RequestBody @Valid Product product
+    ) {
+        productService.addNewProduct(storeId, product);
         return new ResponseEntity<>("Product created.", HttpStatus.CREATED);
     }
 }

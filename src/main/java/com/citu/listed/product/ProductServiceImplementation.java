@@ -1,6 +1,10 @@
 package com.citu.listed.product;
 
+import com.citu.listed.exception.BadRequestException;
 import com.citu.listed.exception.NotFoundException;
+import com.citu.listed.store.Store;
+import com.citu.listed.store.StoreRepository;
+import com.citu.listed.store.StoreStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +22,9 @@ public class ProductServiceImplementation implements ProductService{
     private ProductRepository productRepository;
 
     @Autowired
+    private StoreRepository storeRepository;
+
+    @Autowired
     private ProductResponseMapper productResponseMapper;
 
     @Override
@@ -29,13 +36,15 @@ public class ProductServiceImplementation implements ProductService{
             int pageNumber,
             int pageSize
     ) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new NotFoundException("Store not found."));
         List<Product> products;
 
         if(barcode.isEmpty()) {
             Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(sort));
-            products = productRepository.findByStoreId(storeId, filter.trim(), pageable);
+            products = productRepository.findByStore(store.getId(), filter.trim(), pageable);
         } else {
-            products = productRepository.findByStoreIdAndBarcode(storeId, barcode);
+            products = productRepository.findByStoreAndBarcode(store, barcode);
         }
 
         return products.stream()
@@ -52,17 +61,36 @@ public class ProductServiceImplementation implements ProductService{
     }
 
     @Override
-    public void addNewProduct(Product product) {
+    public void addNewProduct(Integer storeId, Product product) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new NotFoundException("Store not found."));
+
+        if(store.getStatus() != StoreStatus.OPEN)
+            throw new BadRequestException("Store is CLOSED. Cannot add new product.");
+        else if(!validateBarcode(store, product.getBarcode()))
+            throw new BadRequestException("Barcode must be unique.");
+
         Product newProduct = Product.builder()
                 .name(product.getName())
                 .barcode(product.getBarcode())
                 .variant(product.getVariant())
                 .salePrice(product.getSalePrice())
-                .threshold(product.getThreshold())
+                .threshold(validateThreshold(product.getUnit(), product.getThreshold()))
                 .unit(product.getUnit())
-                .store(product.getStore())
+                .store(store)
                 .build();
 
         productRepository.save(newProduct);
+    }
+
+    @Override
+    public boolean validateBarcode(Store store, String barcode) {
+        return productRepository.findByStoreAndBarcode(store, barcode).isEmpty();
+    }
+
+    private Double validateThreshold(ProductUnit unit, Double threshold) {
+        return threshold != null ?
+                (unit == ProductUnit.PCS ? Math.floor(threshold) : threshold) :
+                null;
     }
 }
