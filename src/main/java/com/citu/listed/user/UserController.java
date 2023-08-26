@@ -1,5 +1,6 @@
 package com.citu.listed.user;
 
+import com.citu.listed.shared.ValidationResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,24 +13,26 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     @Autowired
-    private UserService service;
+    private UserService userService;
 
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(
             @RequestBody @Valid RegisterRequest request
     ){
-        return new ResponseEntity<>(service.register(request), HttpStatus.CREATED);
+        return new ResponseEntity<>(userService.register(request), HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
     public ResponseEntity<AuthenticationResponse> authenticate(
             @RequestBody AuthenticationRequest request
     ){
-        return ResponseEntity.ok(service.authenticate(request));
+        return ResponseEntity.ok(userService.authenticate(request));
     }
 
-    @PostMapping("/validation/username")
+    @PostMapping("users/validation/username")
     public ResponseEntity<Object> validateUsername(@RequestParam String username){
-        return new ResponseEntity<>(service.validateUsername(username), HttpStatus.OK);
+        return new ResponseEntity<>(
+                new ValidationResponse(userService.validateUsername(username)),
+                HttpStatus.OK);
     }
 }
