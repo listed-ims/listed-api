@@ -1,7 +1,5 @@
 package com.citu.listed.user;
 
-import com.citu.listed.product.ProductResponse;
-
 public interface UserService {
 
    AuthenticationResponse register(RegisterRequest request);
