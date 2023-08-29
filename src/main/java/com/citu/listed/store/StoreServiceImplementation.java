@@ -85,4 +85,15 @@ public class StoreServiceImplementation implements StoreService {
         membershipRepository.save(membership);
     }
 
+    @Override
+    public void updateStore(Integer id, Store store) {
+        Store storeToUpdate = storeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Store to update not found."));
+
+        storeToUpdate.setName(store.getName());
+        storeToUpdate.setStatus(store.getStatus());
+
+        storeRepository.save(storeToUpdate);
+    }
+
 }
