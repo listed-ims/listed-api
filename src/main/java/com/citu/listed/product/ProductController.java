@@ -44,6 +44,15 @@ public class ProductController {
         return new ResponseEntity<>("Product created.", HttpStatus.CREATED);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<Object> updateProduct(
+            @PathVariable Integer id,
+            @RequestBody @Valid Product product
+    ) {
+        productService.updateProduct(id, product);
+        return new ResponseEntity<>("Product updated.", HttpStatus.OK);
+    }
+
     @PostMapping("/validation/barcode")
     public ResponseEntity<Object> getProduct(
             @RequestParam Integer storeId,

@@ -77,6 +77,20 @@ public class ProductServiceImplementation implements ProductService{
         productRepository.save(newProduct);
     }
 
+    @Override
+    public void updateProduct(Integer id, Product product) {
+        Product productToUpdate = productRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Product not found."));
+
+        productToUpdate.setName(product.getName());
+        productToUpdate.setBarcode(product.getBarcode());
+        productToUpdate.setVariant(productToUpdate.getVariant());
+        productToUpdate.setSalePrice(product.getSalePrice());
+        productToUpdate.setThreshold(validateThreshold(productToUpdate.getUnit(), product.getThreshold()));
+
+        productRepository.save(productToUpdate);
+    }
+
     public boolean validateBarcode(Integer storeId, String barcode) {
         if (barcode == null || barcode.isEmpty())
             return true;
