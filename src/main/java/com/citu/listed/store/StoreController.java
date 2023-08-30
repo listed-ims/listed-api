@@ -47,4 +47,12 @@ public class StoreController {
         return new ResponseEntity<>("Store created.", HttpStatus.CREATED);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<Object> updateStore(
+            @PathVariable Integer id,
+            @RequestBody @Valid Store store
+    ) {
+        storeService.updateStore(id, store);
+        return new ResponseEntity<>("Store updated.", HttpStatus.OK);
+    }
 }

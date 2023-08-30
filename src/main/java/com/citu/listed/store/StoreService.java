@@ -11,4 +11,5 @@ public interface StoreService {
             int pageSize);
     StoreResponse getStore(Integer id);
     void createStore(String token, Store store);
+    void updateStore(Integer id, Store store);
 }
