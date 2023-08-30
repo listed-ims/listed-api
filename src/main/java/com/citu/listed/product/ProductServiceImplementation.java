@@ -84,7 +84,7 @@ public class ProductServiceImplementation implements ProductService{
 
         productToUpdate.setName(product.getName());
         productToUpdate.setBarcode(product.getBarcode());
-        productToUpdate.setVariant(productToUpdate.getVariant());
+        productToUpdate.setVariant(product.getVariant());
         productToUpdate.setSalePrice(product.getSalePrice());
         productToUpdate.setThreshold(validateThreshold(productToUpdate.getUnit(), product.getThreshold()));
 
