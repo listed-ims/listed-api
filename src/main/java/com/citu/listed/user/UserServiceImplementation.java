@@ -20,7 +20,7 @@ public class UserServiceImplementation implements UserService{
     private final AuthenticationManager authenticationManager;
     private final UserResponseMapper userResponseMapper;
 
-    public AuthenticationResponse register(RegisterRequest request){
+    public AuthenticationResponse register(UserRequest request){
         var user = User.builder()
                 .name(request.getName())
                 .username(request.getUsername())
@@ -66,6 +66,31 @@ public class UserServiceImplementation implements UserService{
         return user.map(userResponseMapper)
                 .orElseThrow(() -> new NotFoundException("User not found."));
     }
+
+    @Override
+    public UserResponse updateUser(String token, UserRequest request) {
+
+        String currentUsername = jwtService.extractUsername(token);
+
+        User userToUpdate = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new NotFoundException("User not found."));
+
+
+        if (!request.getUsername().equals(currentUsername)) {
+            if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+                throw new BadRequestException("Username is already taken.");
+            }
+            userToUpdate.setUsername(request.getUsername());
+        }
+
+        userToUpdate.setName(request.getName());
+        userToUpdate.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        userRepository.save(userToUpdate);
+
+        return userResponseMapper.apply(userToUpdate);
+    }
+
 
 }
 

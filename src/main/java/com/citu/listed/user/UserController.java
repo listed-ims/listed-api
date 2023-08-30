@@ -18,7 +18,7 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(
-            @RequestBody @Valid RegisterRequest request
+            @RequestBody @Valid UserRequest request
     ){
         return new ResponseEntity<>(userService.register(request), HttpStatus.CREATED);
     }
@@ -46,4 +46,18 @@ public class UserController {
         return new ResponseEntity<>(userResponse, HttpStatus.OK);
     }
 
+    @PutMapping("/users")
+    public ResponseEntity<UserResponse> updateUser(@RequestHeader HttpHeaders headers,
+                                                   @RequestBody @Valid UserRequest request) {
+
+        String token = headers.getFirst(HttpHeaders.AUTHORIZATION).substring(7);
+        UserResponse updatedUserResponse = userService.updateUser(token, request);
+
+        return new ResponseEntity<>(updatedUserResponse, HttpStatus.OK);
+    }
+
+
+
+
 }
+
