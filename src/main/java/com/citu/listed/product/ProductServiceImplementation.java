@@ -5,7 +5,7 @@ import com.citu.listed.exception.NotFoundException;
 import com.citu.listed.store.Store;
 import com.citu.listed.store.StoreRepository;
 import com.citu.listed.store.StoreStatus;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -16,16 +16,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ProductServiceImplementation implements ProductService{
 
-    @Autowired
-    private ProductRepository productRepository;
-
-    @Autowired
-    private StoreRepository storeRepository;
-
-    @Autowired
-    private ProductResponseMapper productResponseMapper;
+    private final ProductRepository productRepository;
+    private final StoreRepository storeRepository;
+    private final ProductResponseMapper productResponseMapper;
 
     @Override
     public List<ProductResponse> getProducts(

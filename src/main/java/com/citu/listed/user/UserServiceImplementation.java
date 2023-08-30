@@ -4,26 +4,21 @@ import com.citu.listed.exception.NotFoundException;
 import com.citu.listed.exception.BadRequestException;
 import com.citu.listed.user.config.JwtService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class UserServiceImplementation implements UserService{
 
     private final UserRepository userRepository;
-
     private final PasswordEncoder passwordEncoder;
-
     private final JwtService jwtService;
-
     private final AuthenticationManager authenticationManager;
-
-    @Autowired
-    private UserResponseMapper userResponseMapper;
+    private final UserResponseMapper userResponseMapper;
 
     public AuthenticationResponse register(RegisterRequest request){
         var user = User.builder()

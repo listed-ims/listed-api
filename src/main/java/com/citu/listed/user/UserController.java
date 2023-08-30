@@ -2,7 +2,7 @@ package com.citu.listed.user;
 
 import com.citu.listed.shared.ValidationResponse;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @CrossOrigin
 @RequestMapping("/listed/api")
+@RequiredArgsConstructor
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(
@@ -41,7 +41,7 @@ public class UserController {
     public ResponseEntity<Object> getUser(@RequestHeader HttpHeaders headers) {
 
         String token = headers.getFirst(HttpHeaders.AUTHORIZATION).substring(7);
-        UserResponse userResponse = service.getUser(token);
+        UserResponse userResponse = userService.getUser(token);
 
         return new ResponseEntity<>(userResponse, HttpStatus.OK);
     }

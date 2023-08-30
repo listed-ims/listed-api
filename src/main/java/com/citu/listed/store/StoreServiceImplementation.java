@@ -7,7 +7,7 @@ import com.citu.listed.user.User;
 import com.citu.listed.user.UserRepository;
 import com.citu.listed.user.config.JwtService;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -17,22 +17,14 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class StoreServiceImplementation implements StoreService {
 
-    @Autowired
-    private StoreRepository storeRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private MembershipRepository membershipRepository;
-
-    @Autowired
-    private JwtService jwtService;
-
-    @Autowired
-    private StoreResponseMapper storeResponseMapper;
+    private final StoreRepository storeRepository;
+    private final UserRepository userRepository;
+    private final MembershipRepository membershipRepository;
+    private final JwtService jwtService;
+    private final StoreResponseMapper storeResponseMapper;
 
     @Override
     public List<StoreResponse> getStores(
