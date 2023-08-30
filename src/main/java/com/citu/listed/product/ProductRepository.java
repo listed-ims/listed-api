@@ -11,9 +11,9 @@ import java.util.List;
 public interface ProductRepository extends JpaRepository<Product, Integer> {
 
     @Query("SELECT p FROM Product p WHERE " +
-            "(p.name LIKE CONCAT('%',:filter, '%') " +
-            "Or p.variant LIKE CONCAT('%', :filter, '%')) " +
-            "And p.store.id = :storeId ")
+            "(LOWER(p.name) LIKE CONCAT('%', LOWER(:filter), '%') " +
+            "OR LOWER(p.variant) LIKE CONCAT('%', LOWER(:filter), '%')) " +
+            "AND p.store.id = :storeId ")
     List<Product> findByStoreId(Integer storeId, String filter, Pageable pageable);
     List<Product> findByStoreIdAndBarcode(Integer storeId, String barcode);
 }
