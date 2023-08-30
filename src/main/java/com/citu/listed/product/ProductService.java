@@ -14,5 +14,6 @@ public interface ProductService {
     ProductResponse getProduct(Integer id);
     void addNewProduct(Integer storeId, Product product);
     void updateProduct(Integer id, Product product);
+    void deleteProduct(Integer id);
     boolean validateBarcode(Integer storeId, String barcode);
 }
