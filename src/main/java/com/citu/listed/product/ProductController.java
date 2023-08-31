@@ -53,6 +53,12 @@ public class ProductController {
         return new ResponseEntity<>("Product updated.", HttpStatus.OK);
     }
 
+    @DeleteMapping("{id}")
+    public ResponseEntity<Object> deleteProduct(@PathVariable Integer id) {
+        productService.deleteProduct(id);
+        return new ResponseEntity<>("Product deleted.", HttpStatus.OK);
+    }
+
     @PostMapping("/validation/barcode")
     public ResponseEntity<Object> getProduct(
             @RequestParam Integer storeId,

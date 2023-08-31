@@ -91,6 +91,14 @@ public class ProductServiceImplementation implements ProductService{
         productRepository.save(productToUpdate);
     }
 
+    @Override
+    public void deleteProduct(Integer id) {
+        productRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Product not found."));
+        productRepository.deleteById(id);
+    }
+
+    @Override
     public boolean validateBarcode(Integer storeId, String barcode) {
         if (barcode == null || barcode.isEmpty())
             return true;
