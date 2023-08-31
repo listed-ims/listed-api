@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RegisterRequest {
+public class UserRequest {
 
     @NotEmpty(message = "Name is required.")
     private String name;
