@@ -6,10 +6,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface StoreRepository extends JpaRepository<Store, Integer> {
 
+    Optional<Store> findByIdAndMembersUser(Integer id, User user);
     List<Store> findAllByMembersUser(User user, Pageable pageable);
     List<Store> findAllByMembersUserAndStatus(User user, StoreStatus status, Pageable pageable);
 }
