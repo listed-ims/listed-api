@@ -34,8 +34,12 @@ public class StoreController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getStore(@PathVariable Integer id) {
-        return new ResponseEntity<>(storeService.getStore(id), HttpStatus.OK);
+    public ResponseEntity<Object> getStore(
+            @RequestHeader HttpHeaders headers,
+            @PathVariable Integer id
+    ) {
+        String token = headers.getFirst(HttpHeaders.AUTHORIZATION).substring(7);
+        return new ResponseEntity<>(storeService.getStore(token, id), HttpStatus.OK);
     }
 
     @PostMapping("")

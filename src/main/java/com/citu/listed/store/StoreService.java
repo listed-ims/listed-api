@@ -9,7 +9,7 @@ public interface StoreService {
             StoreStatus status,
             int pageNumber,
             int pageSize);
-    StoreResponse getStore(Integer id);
+    StoreResponse getStore(String token, Integer id);
     void createStore(String token, Store store);
     void updateStore(Integer id, Store store);
 }

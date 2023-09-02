@@ -39,11 +39,10 @@ public class StoreServiceImplementation implements StoreService {
         List<Store> stores;
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
 
-        if(status == null) {
+        if(status == null)
             stores = storeRepository.findAllByMembersUser(user, pageable);
-        } else {
+        else
             stores = storeRepository.findAllByMembersUserAndStatus(user, status, pageable);
-        }
 
         return stores.stream()
                 .map(storeResponseMapper)
@@ -51,8 +50,11 @@ public class StoreServiceImplementation implements StoreService {
     }
 
     @Override
-    public StoreResponse getStore(Integer id) {
-        Optional<Store> store = storeRepository.findById(id);
+    public StoreResponse getStore(String token, Integer id) {
+        User user = userRepository.findByUsername(jwtService.extractUsername(token))
+                .orElseThrow(() -> new NotFoundException("User not found."));
+
+        Optional<Store> store = storeRepository.findByIdAndMembersUser(id, user);
 
         return store.map(storeResponseMapper)
                 .orElseThrow(() -> new NotFoundException("Store not found."));
