@@ -91,6 +91,16 @@ public class UserServiceImplementation implements UserService{
         return userResponseMapper.apply(userToUpdate);
     }
 
+    public boolean validatePassword(String password,String token) {
+        String username = jwtService.extractUsername(token);
+        Optional<User> user = userRepository.findByUsername(username);
+
+        if (username == null || !username.isEmpty()){
+
+            return passwordEncoder.matches(password,user.get().getPassword());
+        }
+        return false;
+        
+    }
 
 }
-

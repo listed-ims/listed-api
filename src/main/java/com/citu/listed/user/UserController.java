@@ -56,8 +56,13 @@ public class UserController {
         return new ResponseEntity<>(updatedUserResponse, HttpStatus.OK);
     }
 
+    @PostMapping("users/validation/password")
+    public ResponseEntity<Object> validatePassword(@RequestHeader HttpHeaders headers ,@RequestParam String password){
+        String token = headers.getFirst(HttpHeaders.AUTHORIZATION).substring(7);
 
-
-
+        return new ResponseEntity<>(
+                new ValidationResponse(userService.validatePassword(password,token)),HttpStatus.OK);
+    }
+    
 }
 
