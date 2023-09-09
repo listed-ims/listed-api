@@ -2,6 +2,8 @@ package com.citu.listed.user;
 
 import com.citu.listed.exception.NotFoundException;
 import com.citu.listed.exception.BadRequestException;
+import com.citu.listed.store.Store;
+import com.citu.listed.store.StoreRepository;
 import com.citu.listed.user.config.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,6 +17,7 @@ import java.util.Optional;
 public class UserServiceImplementation implements UserService{
 
     private final UserRepository userRepository;
+    private final StoreRepository storeRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
@@ -75,22 +78,25 @@ public class UserServiceImplementation implements UserService{
         User userToUpdate = userRepository.findByUsername(currentUsername)
                 .orElseThrow(() -> new NotFoundException("User not found."));
 
-
-        if (!request.getUsername().equals(currentUsername)) {
-            if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-                throw new BadRequestException("Username is already taken.");
+        if(request.getCurrentStoreId() == null) {
+            if (!request.getUsername().equals(currentUsername)) {
+                if (userRepository.findByUsername(request.getUsername()).isPresent())
+                    throw new BadRequestException("Username is already taken.");
+                else
+                    userToUpdate.setUsername(request.getUsername());
             }
-            userToUpdate.setUsername(request.getUsername());
+
+            userToUpdate.setName(request.getName());
+            userToUpdate.setPassword(passwordEncoder.encode(request.getPassword()));
+        } else {
+            Store store = storeRepository.findByIdAndMembersUser(request.getCurrentStoreId(), userToUpdate)
+                    .orElseThrow(() -> new NotFoundException("Store not found."));
+
+            userToUpdate.setCurrentStoreId(store.getId());
         }
 
-        userToUpdate.setName(request.getName());
-        userToUpdate.setPassword(passwordEncoder.encode(request.getPassword()));
-
-        userRepository.save(userToUpdate);
-
-        return userResponseMapper.apply(userToUpdate);
+        return userResponseMapper.apply(userRepository.save(userToUpdate));
     }
-
 
 }
 
