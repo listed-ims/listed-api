@@ -93,14 +93,9 @@ public class UserServiceImplementation implements UserService{
 
     public boolean validatePassword(String password,String token) {
         String username = jwtService.extractUsername(token);
-        Optional<User> user = userRepository.findByUsername(username);
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
 
-        if (username == null || !username.isEmpty()){
-
-            return passwordEncoder.matches(password,user.get().getPassword());
+            return passwordEncoder.matches(password, user.getPassword());
         }
-        return false;
-        
-    }
 
 }
