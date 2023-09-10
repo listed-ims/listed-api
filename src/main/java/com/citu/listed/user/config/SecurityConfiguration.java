@@ -29,6 +29,7 @@ public class SecurityConfiguration {
                 .requestMatchers("/listed/api/login").permitAll()
                 .requestMatchers("/listed/api/register").permitAll()
                 .requestMatchers("/listed/api/users/validation/username").permitAll()
+                .requestMatchers("/listed/api/users/validation/password").permitAll()
                 .requestMatchers("/v2/api/docs").permitAll()
                 .requestMatchers("/v3/api/docs").permitAll()
                 .requestMatchers("/v3/api-docs/**").permitAll()

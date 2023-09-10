@@ -7,6 +7,7 @@ public interface UserService {
    boolean validateUsername(String username);
    UserResponse getUser(String token);
    UserResponse updateUser(String token, UserRequest request);
+   boolean validatePassword(String password,String token);
 
 
 }
