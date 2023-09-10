@@ -66,17 +66,20 @@ public class StoreServiceImplementation implements StoreService {
         User user = userRepository.findByUsername(jwtService.extractUsername(token))
                 .orElseThrow(() -> new NotFoundException("User not found."));
 
-        Store newStore = Store.builder()
-                .name(store.getName())
-                .status(StoreStatus.OPEN)
-                .build();
+        Store newStore = storeRepository.save(
+                Store.builder()
+                        .name(store.getName())
+                        .status(StoreStatus.OPEN)
+                        .build());
 
-        Membership membership = Membership.builder()
-                .store(storeRepository.save(newStore))
-                .user(user)
-                .build();
+        Membership membership = membershipRepository.save(
+                Membership.builder()
+                        .store(newStore)
+                        .user(user)
+                        .build());
 
-        membershipRepository.save(membership);
+        if(user.getCurrentStoreId() == null)
+            user.setCurrentStoreId(newStore.getId());
     }
 
     @Override

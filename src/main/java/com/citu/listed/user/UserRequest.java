@@ -20,4 +20,6 @@ public class UserRequest {
 
     @NotEmpty(message = "Password is required.")
     private String password;
+
+    private Integer currentStoreId;
 }

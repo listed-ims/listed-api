@@ -26,12 +26,16 @@ public class User implements UserDetails{
 
     @Column
     private String password;
+    
+    @Column
+    private Integer currentStoreId;
 
     @Builder
     public User(String name, String username, String password) {
         this.name = name;
         this.username = username;
         this.password = password;
+        this.currentStoreId = null;
     }
 
     @Override
