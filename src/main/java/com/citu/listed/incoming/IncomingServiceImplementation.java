@@ -4,8 +4,6 @@ package com.citu.listed.incoming;
 import com.citu.listed.exception.NotFoundException;
 import com.citu.listed.product.Product;
 import com.citu.listed.product.ProductRepository;
-import com.citu.listed.store.Store;
-import com.citu.listed.store.StoreRepository;
 import com.citu.listed.user.User;
 import com.citu.listed.user.UserRepository;
 import lombok.RequiredArgsConstructor;
