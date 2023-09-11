@@ -56,10 +56,13 @@ public class Incoming {
     @Column
     private LocalDateTime transactionDate;
 
+    @Column
+    private String referenceNumber;
+
     @Builder
     public Incoming(Integer id, Product product, User user, Double initialQuantity,
                     Double actualQuantity, Double purchasePrice, LocalDate expirationDate, String comment,
-                    LocalDateTime transactionDate) {
+                    LocalDateTime transactionDate, String referenceNumber) {
 
         this.id = id;
         this.product = product;
@@ -70,5 +73,6 @@ public class Incoming {
         this.expirationDate = expirationDate;
         this.comment = comment;
         this.transactionDate = transactionDate;
+        this.referenceNumber = referenceNumber;
     }
 }
