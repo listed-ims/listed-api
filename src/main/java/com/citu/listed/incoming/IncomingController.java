@@ -28,9 +28,15 @@ public class IncomingController {
 
         return new ResponseEntity<>(incomingResponse, HttpStatus.CREATED);
     }
+
     @GetMapping("/incoming")
     public ResponseEntity<Object> getIncomingTransactions(@RequestParam Integer storeId){
         return new ResponseEntity<>(incomingService.getIncomingTransactions(storeId),HttpStatus.OK);
+    }
+
+    @GetMapping("/incoming/{id}")
+    public ResponseEntity<Object> getIncomingTransaction(@PathVariable Integer id){
+        return new ResponseEntity<>(incomingService.getIncomingTransaction(id),HttpStatus.OK);
     }
 
 }

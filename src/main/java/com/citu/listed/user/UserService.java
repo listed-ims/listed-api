@@ -8,6 +8,5 @@ public interface UserService {
    UserResponse getUser(String token);
    UserResponse updateUser(String token, UserRequest request);
    boolean validatePassword(String password,String token);
-
-
+   boolean validateToken(String token);
 }

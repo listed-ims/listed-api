@@ -66,5 +66,11 @@ public class IncomingServiceImplementation implements IncomingService {
 
         return incoming.stream().map(incomingResponseMapper).collect(Collectors.toList());
 
+    @Override
+    public IncomingResponse getIncomingTransaction(Integer id){
+        Optional<Incoming> incoming = incomingRepository.findById(id);
+
+        return incoming.map(incomingResponseMapper)
+                .orElseThrow(() -> new NotFoundException("Transaction not found."));
     }
 }

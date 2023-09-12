@@ -8,6 +8,8 @@ import com.citu.listed.user.config.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -16,6 +18,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserServiceImplementation implements UserService{
 
+    private final UserDetailsService userDetailsService;
     private final UserRepository userRepository;
     private final StoreRepository storeRepository;
     private final PasswordEncoder passwordEncoder;
@@ -104,5 +107,13 @@ public class UserServiceImplementation implements UserService{
 
             return passwordEncoder.matches(password, user.getPassword());
         }
+
+    @Override
+    public boolean validateToken(String token) {
+        UserDetails userDetails = userDetailsService
+                .loadUserByUsername(jwtService.extractUsername(token));
+
+        return jwtService.isTokenValid(token, userDetails);
+    }
 
 }
