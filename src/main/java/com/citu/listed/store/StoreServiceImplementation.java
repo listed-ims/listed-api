@@ -62,7 +62,7 @@ public class StoreServiceImplementation implements StoreService {
 
     @Override
     @Transactional
-    public void createStore(String token, Store store) {
+    public StoreResponse createStore(String token, Store store) {
         User user = userRepository.findByUsername(jwtService.extractUsername(token))
                 .orElseThrow(() -> new NotFoundException("User not found."));
 
@@ -80,17 +80,19 @@ public class StoreServiceImplementation implements StoreService {
 
         if(user.getCurrentStoreId() == null)
             user.setCurrentStoreId(newStore.getId());
+
+        return storeResponseMapper.apply(newStore);
     }
 
     @Override
-    public void updateStore(Integer id, Store store) {
+    public StoreResponse updateStore(Integer id, Store store) {
         Store storeToUpdate = storeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Store to update not found."));
 
         storeToUpdate.setName(store.getName());
         storeToUpdate.setStatus(store.getStatus());
 
-        storeRepository.save(storeToUpdate);
+        return storeResponseMapper.apply(storeRepository.save(storeToUpdate));
     }
 
 }
