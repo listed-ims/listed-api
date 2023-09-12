@@ -47,8 +47,8 @@ public class StoreController {
             @RequestHeader HttpHeaders headers,
             @RequestBody @Valid Store store
     ) {
-        storeService.createStore(headers.getFirst(HttpHeaders.AUTHORIZATION).substring(7), store);
-        return new ResponseEntity<>("Store created.", HttpStatus.CREATED);
+        String token = headers.getFirst(HttpHeaders.AUTHORIZATION).substring(7);
+        return new ResponseEntity<>(storeService.createStore(token, store), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
@@ -56,7 +56,6 @@ public class StoreController {
             @PathVariable Integer id,
             @RequestBody @Valid Store store
     ) {
-        storeService.updateStore(id, store);
-        return new ResponseEntity<>("Store updated.", HttpStatus.OK);
+        return new ResponseEntity<>(storeService.updateStore(id, store), HttpStatus.OK);
     }
 }
