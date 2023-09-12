@@ -63,6 +63,14 @@ public class UserController {
         return new ResponseEntity<>(
                 new ValidationResponse(userService.validatePassword(password,token)),HttpStatus.OK);
     }
+
+    @PostMapping("users/validation/token")
+    public ResponseEntity<Object> validatePassword(@RequestHeader HttpHeaders headers) {
+        String token = headers.getFirst(HttpHeaders.AUTHORIZATION).substring(7);
+
+        return new ResponseEntity<>(
+                new ValidationResponse(userService.validateToken(token)),HttpStatus.OK);
+    }
     
 }
 
