@@ -11,6 +11,7 @@ import com.citu.listed.user.config.JwtService;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -54,5 +55,12 @@ public class IncomingServiceImplementation implements IncomingService {
         return transactionDate.format(DateTimeFormatter.ofPattern("MMddyy"))
                 + "-"
                 + (incomingRepository.countByTransactionDate(transactionDate) + 1);
+    }
+    @Override
+    public IncomingResponse getIncomingTransaction(Integer id){
+        Optional<Incoming> incoming = incomingRepository.findById(id);
+
+        return incoming.map(incomingResponseMapper)
+                .orElseThrow(() -> new NotFoundException("Transaction not found."));
     }
 }
