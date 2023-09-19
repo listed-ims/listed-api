@@ -11,7 +11,9 @@ import com.citu.listed.user.config.JwtService;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -56,6 +58,14 @@ public class IncomingServiceImplementation implements IncomingService {
                 + "-"
                 + (incomingRepository.countByTransactionDate(transactionDate) + 1);
     }
+
+    @Override
+    public List<IncomingResponse> getIncomingTransactions(Integer storeId){
+        List<Incoming> incoming;
+        incoming= incomingRepository.findByProductStoreId(storeId);
+
+        return incoming.stream().map(incomingResponseMapper).collect(Collectors.toList());
+
     @Override
     public IncomingResponse getIncomingTransaction(Integer id){
         Optional<Incoming> incoming = incomingRepository.findById(id);
