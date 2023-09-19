@@ -60,11 +60,12 @@ public class IncomingServiceImplementation implements IncomingService {
     }
 
     @Override
-    public List<IncomingResponse> getIncomingTransactions(Integer storeId){
+    public List<IncomingResponse> getIncomingTransactions(Integer storeId) {
         List<Incoming> incoming;
-        incoming= incomingRepository.findByProductStoreId(storeId);
+        incoming = incomingRepository.findByProductStoreId(storeId);
 
         return incoming.stream().map(incomingResponseMapper).collect(Collectors.toList());
+    }
 
     @Override
     public IncomingResponse getIncomingTransaction(Integer id){
