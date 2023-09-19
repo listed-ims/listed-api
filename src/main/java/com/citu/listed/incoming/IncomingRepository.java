@@ -13,5 +13,11 @@ public interface IncomingRepository extends JpaRepository<Incoming, Integer> {
     @Query("SELECT COUNT(incoming) FROM Incoming incoming WHERE DATE(incoming.transactionDate) = DATE(:transactionDate)")
     long countByTransactionDate(LocalDateTime transactionDate);
     List<Incoming> findByProductStoreId(Integer storeId);
+    Long countByTransactionDate(LocalDateTime transactionDate);
 
+    @Query("SELECT SUM(incoming.actualQuantity) FROM Incoming incoming WHERE incoming.product.store.id = :storeId")
+    Double getTotalProductsByStoreId(Integer storeId);
+
+    @Query("SELECT SUM(incoming.actualQuantity * incoming.purchasePrice) FROM Incoming incoming WHERE incoming.product.store.id = :storeId")
+    Double getTotalPriceValueByStoreId(Integer storeId);
 }
