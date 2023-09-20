@@ -1,11 +1,16 @@
 package com.citu.listed.product;
 
+import com.citu.listed.incoming.IncomingRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.function.Function;
 
 @Service
+@RequiredArgsConstructor
 public class ProductResponseMapper implements Function<Product, ProductResponse> {
+
+    private final IncomingRepository incomingRepository;
 
     @Override
     public ProductResponse apply(Product product) {
@@ -17,8 +22,8 @@ public class ProductResponseMapper implements Function<Product, ProductResponse>
                 product.getSalePrice(),
                 product.getThreshold(),
                 product.getUnit(),
-                0.0,
-                0.0,
+                incomingRepository.getTotalQuantityByProductId(product.getId()),
+                incomingRepository.getTotalInByProductId(product.getId()),
                 0.0
         );
     }
