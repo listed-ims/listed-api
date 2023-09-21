@@ -1,8 +1,11 @@
 package com.citu.listed.store;
 
-import com.citu.listed.exception.NotFoundException;
+import com.citu.listed.shared.exception.NotFoundException;
 import com.citu.listed.membership.Membership;
 import com.citu.listed.membership.MembershipRepository;
+import com.citu.listed.store.dtos.StoreResponse;
+import com.citu.listed.store.enums.StoreStatus;
+import com.citu.listed.store.mappers.StoreResponseMapper;
 import com.citu.listed.user.User;
 import com.citu.listed.user.UserRepository;
 import com.citu.listed.user.config.JwtService;

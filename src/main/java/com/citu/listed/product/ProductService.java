@@ -1,5 +1,8 @@
 package com.citu.listed.product;
 
+import com.citu.listed.product.dtos.ProductResponse;
+import com.citu.listed.product.enums.ProductFilter;
+
 import java.util.List;
 
 public interface ProductService {

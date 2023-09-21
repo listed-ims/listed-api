@@ -1,4 +1,4 @@
-package com.citu.listed.product;
+package com.citu.listed.product.enums;
 
 public enum ProductFilter {
     LOW_STOCK,

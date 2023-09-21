@@ -1,4 +1,4 @@
-package com.citu.listed.incoming;
+package com.citu.listed.incoming.dtos;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-
 
 @Data
 @Builder

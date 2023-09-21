@@ -26,17 +26,30 @@ com
           |   +- UserRepository.java
           |
           +- product
+          |   +- dtos
+          |   +- enums
+          |   +- mappers
+          |   +- exceptions
           |   +- Product.java
           |   +- ProductController.java
           |   +- ProductService.java
           |   +- ProductRepository.java
           |
           +- store
+          |   +- dtos
+          |   +- enums
+          |   +- mappers
+          |   +- exceptions
           |   +- Store.java
           |   +- StoreController.java
           |   +- StoreService.java
           |   +- StoreRepository.java
           |
+          +- shared
+          |   +- dtos
+          |   +- enums
+          |   +- mappers
+          |   +- exceptions
 ```
 
 ## Naming Convention

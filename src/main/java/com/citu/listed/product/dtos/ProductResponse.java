@@ -1,4 +1,6 @@
-package com.citu.listed.product;
+package com.citu.listed.product.dtos;
+
+import com.citu.listed.product.enums.ProductUnit;
 
 public record ProductResponse(
         Integer id,

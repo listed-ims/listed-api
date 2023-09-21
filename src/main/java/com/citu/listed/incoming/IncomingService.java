@@ -1,5 +1,7 @@
 package com.citu.listed.incoming;
 
+import com.citu.listed.incoming.dtos.IncomingRequest;
+import com.citu.listed.incoming.dtos.IncomingResponse;
 
 import java.util.List;
 

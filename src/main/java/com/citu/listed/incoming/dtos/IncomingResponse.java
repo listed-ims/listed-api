@@ -1,7 +1,7 @@
-package com.citu.listed.incoming;
+package com.citu.listed.incoming.dtos;
 
-import com.citu.listed.product.ProductResponse;
-import com.citu.listed.user.UserResponse;
+import com.citu.listed.product.dtos.ProductResponse;
+import com.citu.listed.user.dtos.UserResponse;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

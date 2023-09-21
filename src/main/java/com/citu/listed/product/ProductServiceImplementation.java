@@ -1,11 +1,15 @@
 package com.citu.listed.product;
 
-import com.citu.listed.exception.BadRequestException;
-import com.citu.listed.exception.NotFoundException;
+import com.citu.listed.shared.exception.BadRequestException;
+import com.citu.listed.shared.exception.NotFoundException;
 import com.citu.listed.incoming.IncomingRepository;
+import com.citu.listed.product.dtos.ProductResponse;
+import com.citu.listed.product.enums.ProductFilter;
+import com.citu.listed.product.enums.ProductUnit;
+import com.citu.listed.product.mappers.ProductResponseMapper;
 import com.citu.listed.store.Store;
 import com.citu.listed.store.StoreRepository;
-import com.citu.listed.store.StoreStatus;
+import com.citu.listed.store.enums.StoreStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
