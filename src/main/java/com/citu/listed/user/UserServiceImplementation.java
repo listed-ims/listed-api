@@ -1,10 +1,15 @@
 package com.citu.listed.user;
 
-import com.citu.listed.exception.NotFoundException;
-import com.citu.listed.exception.BadRequestException;
+import com.citu.listed.shared.exception.NotFoundException;
+import com.citu.listed.shared.exception.BadRequestException;
 import com.citu.listed.store.Store;
 import com.citu.listed.store.StoreRepository;
 import com.citu.listed.user.config.JwtService;
+import com.citu.listed.user.dtos.AuthenticationRequest;
+import com.citu.listed.user.dtos.AuthenticationResponse;
+import com.citu.listed.user.dtos.UserRequest;
+import com.citu.listed.user.dtos.UserResponse;
+import com.citu.listed.user.mappers.UserResponseMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

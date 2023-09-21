@@ -1,6 +1,8 @@
-package com.citu.listed.store;
+package com.citu.listed.store.mappers;
 
 import com.citu.listed.incoming.IncomingRepository;
+import com.citu.listed.store.Store;
+import com.citu.listed.store.dtos.StoreResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -1,4 +1,4 @@
-package com.citu.listed.exception;
+package com.citu.listed.shared.exception;
 
 public class NotFoundException extends RuntimeException {
 

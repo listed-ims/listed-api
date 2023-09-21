@@ -1,5 +1,6 @@
 package com.citu.listed.product;
 
+import com.citu.listed.product.enums.ProductUnit;
 import com.citu.listed.store.Store;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;

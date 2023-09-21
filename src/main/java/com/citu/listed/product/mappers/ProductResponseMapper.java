@@ -1,6 +1,8 @@
-package com.citu.listed.product;
+package com.citu.listed.product.mappers;
 
 import com.citu.listed.incoming.IncomingRepository;
+import com.citu.listed.product.Product;
+import com.citu.listed.product.dtos.ProductResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

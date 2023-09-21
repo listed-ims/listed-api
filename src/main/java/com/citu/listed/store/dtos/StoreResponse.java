@@ -1,4 +1,6 @@
-package com.citu.listed.store;
+package com.citu.listed.store.dtos;
+
+import com.citu.listed.store.enums.StoreStatus;
 
 public record StoreResponse(
         Integer id,
