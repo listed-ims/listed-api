@@ -1,5 +1,10 @@
 package com.citu.listed.user;
 
+import com.citu.listed.user.dtos.AuthenticationRequest;
+import com.citu.listed.user.dtos.AuthenticationResponse;
+import com.citu.listed.user.dtos.UserRequest;
+import com.citu.listed.user.dtos.UserResponse;
+
 public interface UserService {
 
    AuthenticationResponse register(UserRequest request);

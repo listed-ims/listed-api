@@ -1,6 +1,8 @@
 package com.citu.listed.incoming;
 
-
+import com.citu.listed.incoming.dtos.IncomingRequest;
+import com.citu.listed.incoming.dtos.IncomingResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Incoming")
 @RestController
 @CrossOrigin
 @RequestMapping("/listed/api")

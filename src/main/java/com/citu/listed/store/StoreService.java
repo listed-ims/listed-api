@@ -1,5 +1,8 @@
 package com.citu.listed.store;
 
+import com.citu.listed.store.dtos.StoreResponse;
+import com.citu.listed.store.enums.StoreStatus;
+
 import java.util.List;
 
 public interface StoreService {

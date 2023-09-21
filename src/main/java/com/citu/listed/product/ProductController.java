@@ -1,12 +1,16 @@
 package com.citu.listed.product;
 
-import com.citu.listed.shared.ValidationResponse;
+import com.citu.listed.product.enums.ProductFilter;
+import com.citu.listed.shared.dtos.ValidationResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Product")
 @RestController
 @CrossOrigin
 @RequestMapping("/listed/api/products")
@@ -15,6 +19,7 @@ public class ProductController {
 
     private final ProductService productService;
 
+    @Operation(description = "Get all products by store.")
     @GetMapping("")
     public ResponseEntity<Object> getProducts(
             @RequestParam Integer storeId,
@@ -31,6 +36,7 @@ public class ProductController {
         );
     }
 
+    @Operation(description = "Get product details by id.")
     @GetMapping("/{id}")
     public ResponseEntity<Object> getProduct(@PathVariable Integer id) {
         return new ResponseEntity<>(productService.getProduct(id), HttpStatus.OK);

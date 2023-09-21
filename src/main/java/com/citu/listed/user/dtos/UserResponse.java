@@ -1,4 +1,4 @@
-package com.citu.listed.user;
+package com.citu.listed.user.dtos;
 
 public record UserResponse(
         Integer id,

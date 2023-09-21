@@ -1,4 +1,4 @@
-package com.citu.listed.store;
+package com.citu.listed.store.enums;
 
 public enum StoreStatus {
     OPEN,

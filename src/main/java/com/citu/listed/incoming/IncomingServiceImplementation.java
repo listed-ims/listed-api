@@ -1,6 +1,9 @@
 package com.citu.listed.incoming;
 
-import com.citu.listed.exception.NotFoundException;
+import com.citu.listed.shared.exception.NotFoundException;
+import com.citu.listed.incoming.dtos.IncomingRequest;
+import com.citu.listed.incoming.dtos.IncomingResponse;
+import com.citu.listed.incoming.mappers.IncomingResponseMapper;
 import com.citu.listed.product.Product;
 import com.citu.listed.product.ProductRepository;
 import com.citu.listed.user.User;

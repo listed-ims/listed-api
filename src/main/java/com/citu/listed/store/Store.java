@@ -1,6 +1,7 @@
 package com.citu.listed.store;
 
 import com.citu.listed.membership.Membership;
+import com.citu.listed.store.enums.StoreStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;

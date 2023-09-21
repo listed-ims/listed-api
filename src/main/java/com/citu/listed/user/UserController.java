@@ -1,6 +1,11 @@
 package com.citu.listed.user;
 
-import com.citu.listed.shared.ValidationResponse;
+import com.citu.listed.shared.dtos.ValidationResponse;
+import com.citu.listed.user.dtos.AuthenticationRequest;
+import com.citu.listed.user.dtos.AuthenticationResponse;
+import com.citu.listed.user.dtos.UserRequest;
+import com.citu.listed.user.dtos.UserResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -8,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "User")
 @RestController
 @CrossOrigin
 @RequestMapping("/listed/api")

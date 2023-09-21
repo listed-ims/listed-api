@@ -1,5 +1,7 @@
 package com.citu.listed.store;
 
+import com.citu.listed.store.enums.StoreStatus;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -7,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Store")
 @RestController
 @CrossOrigin
 @RequestMapping("/listed/api/stores")

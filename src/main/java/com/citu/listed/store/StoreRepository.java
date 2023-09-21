@@ -1,5 +1,6 @@
 package com.citu.listed.store;
 
+import com.citu.listed.store.enums.StoreStatus;
 import com.citu.listed.user.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
