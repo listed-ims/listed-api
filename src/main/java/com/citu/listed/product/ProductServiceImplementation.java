@@ -2,6 +2,7 @@ package com.citu.listed.product;
 
 import com.citu.listed.exception.BadRequestException;
 import com.citu.listed.exception.NotFoundException;
+import com.citu.listed.incoming.IncomingRepository;
 import com.citu.listed.store.Store;
 import com.citu.listed.store.StoreRepository;
 import com.citu.listed.store.StoreStatus;
@@ -21,13 +22,15 @@ public class ProductServiceImplementation implements ProductService{
 
     private final ProductRepository productRepository;
     private final StoreRepository storeRepository;
+    private final IncomingRepository incomingRepository;
     private final ProductResponseMapper productResponseMapper;
 
     @Override
     public List<ProductResponse> getProducts(
             Integer storeId,
             String barcode,
-            String filter,
+            String keyword,
+            ProductFilter filter,
             String sort,
             int pageNumber,
             int pageSize
@@ -36,7 +39,14 @@ public class ProductServiceImplementation implements ProductService{
 
         if(barcode.isEmpty()) {
             Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(sort));
-            products = productRepository.findByStoreId(storeId, filter.trim(), pageable);
+
+            if(filter == ProductFilter.LOW_STOCK)
+                products =  productRepository.getLowStockProductsByStoreId(storeId, pageable);
+            else if(filter == ProductFilter.NO_STOCK)
+                products = productRepository.getNoStockProductsByStoreId(storeId, pageable);
+            else
+                products = productRepository.findByStoreId(storeId, keyword.trim(), pageable);
+
         } else {
             products = productRepository.findByStoreIdAndBarcode(storeId, barcode);
         }
@@ -55,7 +65,7 @@ public class ProductServiceImplementation implements ProductService{
     }
 
     @Override
-    public void addNewProduct(Integer storeId, Product product) {
+    public ProductResponse addNewProduct(Integer storeId, Product product) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new NotFoundException("Store not found."));
 
@@ -74,11 +84,11 @@ public class ProductServiceImplementation implements ProductService{
                 .store(store)
                 .build();
 
-        productRepository.save(newProduct);
+        return productResponseMapper.apply(productRepository.save(newProduct));
     }
 
     @Override
-    public void updateProduct(Integer id, Product product) {
+    public ProductResponse updateProduct(Integer id, Product product) {
         Product productToUpdate = productRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Product not found."));
 
@@ -88,14 +98,20 @@ public class ProductServiceImplementation implements ProductService{
         productToUpdate.setSalePrice(product.getSalePrice());
         productToUpdate.setThreshold(validateThreshold(productToUpdate.getUnit(), product.getThreshold()));
 
-        productRepository.save(productToUpdate);
+        return productResponseMapper.apply(productRepository.save(productToUpdate));
     }
 
     @Override
-    public void deleteProduct(Integer id) {
-        productRepository.findById(id)
+    public ProductResponse deleteProduct(Integer id) {
+        if(incomingRepository.getTotalQuantityByProductId(id) > 0)
+            throw new BadRequestException("Product still has stock.");
+
+        Product productToDelete = productRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Product not found."));
+
         productRepository.deleteById(id);
+
+        return productResponseMapper.apply(productToDelete);
     }
 
     @Override

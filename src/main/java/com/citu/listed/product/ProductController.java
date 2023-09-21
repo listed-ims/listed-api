@@ -19,13 +19,14 @@ public class ProductController {
     public ResponseEntity<Object> getProducts(
             @RequestParam Integer storeId,
             @RequestParam(defaultValue = "") String barcode,
-            @RequestParam(defaultValue = "") String filter,
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "") ProductFilter filter,
             @RequestParam(defaultValue = "name") String sort,
             @RequestParam(defaultValue = "1") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize
     ) {
         return new ResponseEntity<>(
-                productService.getProducts(storeId, barcode, filter, sort, pageNumber, pageSize),
+                productService.getProducts(storeId, barcode, keyword, filter, sort, pageNumber, pageSize),
                 HttpStatus.OK
         );
     }
@@ -40,8 +41,7 @@ public class ProductController {
             @RequestParam Integer storeId,
             @RequestBody @Valid Product product
     ) {
-        productService.addNewProduct(storeId, product);
-        return new ResponseEntity<>("Product created.", HttpStatus.CREATED);
+        return new ResponseEntity<>(productService.addNewProduct(storeId, product), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
@@ -49,14 +49,12 @@ public class ProductController {
             @PathVariable Integer id,
             @RequestBody @Valid Product product
     ) {
-        productService.updateProduct(id, product);
-        return new ResponseEntity<>("Product updated.", HttpStatus.OK);
+        return new ResponseEntity<>(productService.updateProduct(id, product), HttpStatus.OK);
     }
 
     @DeleteMapping("{id}")
     public ResponseEntity<Object> deleteProduct(@PathVariable Integer id) {
-        productService.deleteProduct(id);
-        return new ResponseEntity<>("Product deleted.", HttpStatus.OK);
+        return new ResponseEntity<>(productService.deleteProduct(id), HttpStatus.OK);
     }
 
     @PostMapping("/validation/barcode")

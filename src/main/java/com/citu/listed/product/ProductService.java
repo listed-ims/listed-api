@@ -6,14 +6,15 @@ public interface ProductService {
     List<ProductResponse> getProducts(
             Integer storeId,
             String barcode,
-            String filter,
+            String keyword,
+            ProductFilter filter,
             String sort,
             int pageNumber,
             int pageSize
     );
     ProductResponse getProduct(Integer id);
-    void addNewProduct(Integer storeId, Product product);
-    void updateProduct(Integer id, Product product);
-    void deleteProduct(Integer id);
+    ProductResponse addNewProduct(Integer storeId, Product product);
+    ProductResponse updateProduct(Integer id, Product product);
+    ProductResponse deleteProduct(Integer id);
     boolean validateBarcode(Integer storeId, String barcode);
 }

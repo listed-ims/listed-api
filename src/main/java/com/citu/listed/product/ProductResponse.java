@@ -8,7 +8,7 @@ public record ProductResponse(
         Double salePrice,
         Double threshold,
         ProductUnit unit,
-        Double totalQuantity,
+        Double quantity,
         Double totalIn,
         Double totalOut
 ) {
