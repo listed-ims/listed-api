@@ -1,4 +1,4 @@
-package com.citu.listed.outgoing;
+package com.citu.listed.outgoing.enums;
 
 public enum OutgoingCategory {
     CONSUMED,

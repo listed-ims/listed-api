@@ -1,6 +1,8 @@
-package com.citu.listed.outgoing;
+package com.citu.listed.outgoing.mappers;
 
-import com.citu.listed.user.UserResponseMapper;
+import com.citu.listed.outgoing.Outgoing;
+import com.citu.listed.outgoing.dtos.OutgoingResponse;
+import com.citu.listed.user.mappers.UserResponseMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.function.Function;

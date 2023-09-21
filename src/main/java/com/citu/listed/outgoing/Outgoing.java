@@ -1,5 +1,6 @@
 package com.citu.listed.outgoing;
 
+import com.citu.listed.outgoing.enums.OutgoingCategory;
 import com.citu.listed.user.User;
 import jakarta.persistence.*;
 import lombok.Builder;

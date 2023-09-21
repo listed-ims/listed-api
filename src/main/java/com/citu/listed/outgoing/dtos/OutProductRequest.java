@@ -1,4 +1,4 @@
-package com.citu.listed.outgoing;
+package com.citu.listed.outgoing.dtos;
 
 import com.citu.listed.product.Product;
 import jakarta.validation.constraints.NotNull;

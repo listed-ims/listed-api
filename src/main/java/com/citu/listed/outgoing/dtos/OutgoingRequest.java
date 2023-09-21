@@ -1,5 +1,6 @@
-package com.citu.listed.outgoing;
+package com.citu.listed.outgoing.dtos;
 
+import com.citu.listed.outgoing.OutProduct;
 import com.citu.listed.outgoing.enums.OutgoingCategory;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

@@ -1,6 +1,6 @@
-package com.citu.listed.outgoing;
+package com.citu.listed.outgoing.dtos;
 
-import com.citu.listed.product.ProductResponse;
+import com.citu.listed.product.dtos.ProductResponse;
 
 public record OutProductResponse(
         Integer id,
