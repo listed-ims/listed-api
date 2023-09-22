@@ -17,6 +17,4 @@ public class OutProductRequest {
     private Product product;
 
     private Double quantity;
-
-    private Double price;
 }

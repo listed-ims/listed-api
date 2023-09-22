@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface IncomingRepository extends JpaRepository<Incoming, Integer> {
@@ -46,4 +47,12 @@ public interface IncomingRepository extends JpaRepository<Incoming, Integer> {
                     "WHERE incoming.product.id = :productId"
     )
     Double getTotalInByProductId(Integer productId);
+
+    @Query(
+            "SELECT incoming FROM Incoming incoming " +
+                    "WHERE incoming.actualQuantity > 0 " +
+                    "AND incoming.product.id = :productId " +
+                    "ORDER BY incoming.transactionDate LIMIT 1"
+    )
+    Optional<Incoming> getEarliestByProductId(Integer productId);
 }

@@ -1,5 +1,7 @@
 package com.citu.listed.outgoing;
 
+import com.citu.listed.outgoing.dtos.OutgoingRequest;
+import com.citu.listed.outgoing.dtos.OutgoingResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -17,13 +19,12 @@ public class OutgoingController {
 
     @PostMapping("/outgoing")
     public ResponseEntity<Object> outProducts(@RequestHeader HttpHeaders headers,
-                                              @RequestBody @Valid Outgoing outgoing){
+                                              @RequestBody @Valid OutgoingRequest request){
 
         String token = headers.getFirst(HttpHeaders.AUTHORIZATION).substring(7);
 
-        OutgoingResponse outgoingResponse = outgoingService.outProducts(token, outgoing);
+        OutgoingResponse outgoingResponse = outgoingService.outProducts(token, request);
 
         return new ResponseEntity<>(outgoingResponse, HttpStatus.CREATED);
-
     }
 }

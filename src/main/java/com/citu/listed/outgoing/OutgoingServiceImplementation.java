@@ -1,9 +1,14 @@
 package com.citu.listed.outgoing;
 
-import com.citu.listed.exception.NotFoundException;
+import com.citu.listed.incoming.Incoming;
 import com.citu.listed.incoming.IncomingRepository;
+import com.citu.listed.outgoing.dtos.OutProductRequest;
+import com.citu.listed.outgoing.dtos.OutgoingRequest;
+import com.citu.listed.outgoing.dtos.OutgoingResponse;
+import com.citu.listed.outgoing.mappers.OutgoingResponseMapper;
 import com.citu.listed.product.Product;
 import com.citu.listed.product.ProductRepository;
+import com.citu.listed.shared.exception.NotFoundException;
 import com.citu.listed.user.User;
 import com.citu.listed.user.UserRepository;
 import com.citu.listed.user.config.JwtService;
@@ -23,13 +28,12 @@ public class OutgoingServiceImplementation implements OutgoingService {
     private final IncomingRepository incomingRepository;
     private final JwtService jwtService;
     private final OutProductRepository outProductRepository;
-    private final OutProductResponseMapper outProductResponseMapper;
     private final OutgoingRepository outgoingRepository;
     private final OutgoingResponseMapper outgoingResponseMapper;
 
     @Override
     @Transactional
-    public OutgoingResponse outProducts(String token, Outgoing outgoing) {
+    public OutgoingResponse outProducts(String token, OutgoingRequest request) {
 
         User user = userRepository.findByUsername(jwtService.extractUsername(token))
                 .orElseThrow(() -> new NotFoundException("User not found."));
@@ -38,7 +42,7 @@ public class OutgoingServiceImplementation implements OutgoingService {
 
         Double totalPrice = 0.0;
 
-        for (OutProduct outProduct:outgoing.getProducts()) {
+        for (OutProductRequest outProduct:request.getProducts()) {
 
             if (outProduct.getQuantity() > incomingRepository.getTotalQuantityByProductId(outProduct.getProduct().getId()))
                 throw new NotFoundException("Insufficient stock.");
@@ -46,24 +50,41 @@ public class OutgoingServiceImplementation implements OutgoingService {
             Product product = productRepository.findById(outProduct.getProduct().getId())
                .orElseThrow(() -> new NotFoundException("Product not found."));
 
-            Double price = calculatePrice(outProduct.getQuantity(), product.getSalePrice());
+            Double quantity = outProduct.getQuantity();
+
+            Double price = calculatePrice(quantity, product.getSalePrice());
 
             OutProduct newOutProduct = OutProduct.builder()
                 .product(product)
-                .quantity(outProduct.getQuantity())
+                .quantity(quantity)
                 .price(price)
                 .build();
 
             outProducts.add(outProductRepository.save(newOutProduct));
             totalPrice += price;
+
+            while (quantity > 0.0){
+                Incoming incoming = incomingRepository.getEarliestByProductId(product.getId())
+                        .orElseThrow(() -> new NotFoundException("No transaction found."));
+
+                Double actualQuantity = incoming.getActualQuantity();
+
+                if(quantity >= actualQuantity) {
+                    incoming.setActualQuantity(0.0);
+                    quantity -= actualQuantity;
+                } else {
+                    incoming.setActualQuantity(actualQuantity - quantity);
+                    quantity = 0.0;
+                }
+            }
         }
 
         Outgoing newOutgoing = Outgoing.builder()
                 .user(user)
                 .products(outProducts)
-                .category(outgoing.getCategory())
+                .category(request.getCategory())
                 .transactionDate(LocalDateTime.now())
-                .comment(outgoing.getComment())
+                .comment(request.getComment())
                 .price(totalPrice)
                 .build();
 
