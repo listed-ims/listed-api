@@ -16,5 +16,6 @@ public class OutProductRequest {
     @NotNull(message = "Product is required.")
     private Product product;
 
+    @NotNull(message = "Quantity is required.")
     private Double quantity;
 }

@@ -17,6 +17,7 @@ public class OutgoingRequest {
     @NotNull(message = "Product is required.")
     private List<OutProductRequest> products;
 
+    @NotNull(message = "Category is required.")
     private OutgoingCategory category;
 
     private String comment;
