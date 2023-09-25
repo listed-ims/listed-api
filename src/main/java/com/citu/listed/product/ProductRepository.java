@@ -42,6 +42,16 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     List<Product> getNoStockProductsByStoreId(Integer storeId, Pageable pageable);
 
     @Query(
+            "SELECT product " +
+                    "FROM Product product " +
+                    "LEFT JOIN Incoming incoming ON incoming.product.id = product.id " +
+                    "WHERE product.store.id = :storeId " +
+                    "GROUP BY product " +
+                    "HAVING COALESCE(SUM(incoming.actualQuantity), 0) != 0"
+    )
+    List<Product> getAvailableProductsByStoreId(Integer storeId, Pageable pageable);
+
+    @Query(
             "SELECT  COALESCE(COUNT(product), 0) " +
                     "FROM Product product " +
                     "WHERE product.store.id = :storeId " +
