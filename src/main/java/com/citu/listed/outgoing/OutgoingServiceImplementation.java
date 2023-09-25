@@ -41,6 +41,7 @@ public class OutgoingServiceImplementation implements OutgoingService {
         List<OutProduct> outProducts = new ArrayList<>();
 
         Double totalPrice = 0.0;
+        Double totalRevenue = 0.0;
 
         for (OutProductRequest outProduct:request.getProducts()) {
 
@@ -51,8 +52,8 @@ public class OutgoingServiceImplementation implements OutgoingService {
                .orElseThrow(() -> new NotFoundException("Product not found."));
 
             Double quantity = outProduct.getQuantity();
-
             Double price = calculatePrice(quantity, product.getSalePrice());
+            Double purchasePrice = 0.0;
 
             OutProduct newOutProduct = OutProduct.builder()
                 .product(product)
@@ -71,12 +72,17 @@ public class OutgoingServiceImplementation implements OutgoingService {
 
                 if(quantity >= actualQuantity) {
                     incoming.setActualQuantity(0.0);
+                    purchasePrice += actualQuantity * incoming.getPurchasePrice();
                     quantity -= actualQuantity;
                 } else {
                     incoming.setActualQuantity(actualQuantity - quantity);
+                    purchasePrice += quantity * incoming.getPurchasePrice();
                     quantity = 0.0;
                 }
             }
+
+            System.out.println("PURCHASE PRICE: " + purchasePrice);
+            totalRevenue += price - purchasePrice;
         }
 
         Outgoing newOutgoing = Outgoing.builder()
@@ -86,6 +92,7 @@ public class OutgoingServiceImplementation implements OutgoingService {
                 .transactionDate(LocalDateTime.now())
                 .comment(request.getComment())
                 .price(totalPrice)
+                .revenue(totalRevenue)
                 .build();
 
         outgoingRepository.save(newOutgoing);

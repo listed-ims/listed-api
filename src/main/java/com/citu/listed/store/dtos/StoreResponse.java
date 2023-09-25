@@ -7,6 +7,10 @@ public record StoreResponse(
         String name,
         StoreStatus status,
         Double totalProducts,
-        Double totalPriceValue
+        Double totalPriceValue,
+        Long totalLowStock,
+        Double totalNearExpiry,
+        Double totalRevenue,
+        Double totalItemsSold
 ) {
 }
