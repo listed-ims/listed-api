@@ -81,7 +81,6 @@ public class OutgoingServiceImplementation implements OutgoingService {
                 }
             }
 
-            System.out.println("PURCHASE PRICE: " + purchasePrice);
             totalRevenue += price - purchasePrice;
         }
 
