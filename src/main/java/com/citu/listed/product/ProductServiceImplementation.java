@@ -48,6 +48,8 @@ public class ProductServiceImplementation implements ProductService{
                 products =  productRepository.getLowStockProductsByStoreId(storeId, pageable);
             else if(filter == ProductFilter.NO_STOCK)
                 products = productRepository.getNoStockProductsByStoreId(storeId, pageable);
+            else if(filter == ProductFilter.WITH_STOCK)
+                products = productRepository.getAvailableProductsByStoreId(storeId, pageable);
             else
                 products = productRepository.findByStoreId(storeId, keyword.trim(), pageable);
 

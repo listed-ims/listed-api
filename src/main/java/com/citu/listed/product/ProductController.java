@@ -63,7 +63,7 @@ public class ProductController {
         return new ResponseEntity<>(productService.deleteProduct(id), HttpStatus.OK);
     }
 
-    @PostMapping("/validation/barcode")
+    @GetMapping("/validation/barcode")
     public ResponseEntity<Object> getProduct(
             @RequestParam Integer storeId,
             @RequestParam String barcode

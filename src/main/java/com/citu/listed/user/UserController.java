@@ -62,7 +62,7 @@ public class UserController {
         return new ResponseEntity<>(updatedUserResponse, HttpStatus.OK);
     }
 
-    @PostMapping("users/validation/password")
+    @GetMapping("users/validation/password")
     public ResponseEntity<Object> validatePassword(@RequestHeader HttpHeaders headers ,@RequestParam String password){
         String token = headers.getFirst(HttpHeaders.AUTHORIZATION).substring(7);
 
@@ -70,7 +70,7 @@ public class UserController {
                 new ValidationResponse(userService.validatePassword(password,token)),HttpStatus.OK);
     }
 
-    @PostMapping("users/validation/token")
+    @GetMapping("users/validation/token")
     public ResponseEntity<Object> validatePassword(@RequestHeader HttpHeaders headers) {
         String token = headers.getFirst(HttpHeaders.AUTHORIZATION).substring(7);
 
