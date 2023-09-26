@@ -16,6 +16,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -79,6 +81,8 @@ public class OutgoingServiceImplementation implements OutgoingService {
             }
         }
 
+        LocalDateTime transactionDate = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+
         Outgoing newOutgoing = Outgoing.builder()
                 .user(user)
                 .products(outProducts)
@@ -86,6 +90,7 @@ public class OutgoingServiceImplementation implements OutgoingService {
                 .transactionDate(LocalDateTime.now())
                 .comment(request.getComment())
                 .price(totalPrice)
+                .referenceNumber(getReferenceNumber(transactionDate))
                 .build();
 
         outgoingRepository.save(newOutgoing);
@@ -95,5 +100,11 @@ public class OutgoingServiceImplementation implements OutgoingService {
 
     private double calculatePrice(Double quantity, Double price){
         return quantity * price;
+    }
+
+    private String getReferenceNumber(LocalDateTime transactionDate) {
+        return transactionDate.format(DateTimeFormatter.ofPattern("MMddyy"))
+                + "-"
+                + (outgoingRepository.countByTransactionDate(transactionDate) + 1);
     }
 }
