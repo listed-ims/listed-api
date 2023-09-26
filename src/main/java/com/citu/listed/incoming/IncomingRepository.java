@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -55,4 +56,12 @@ public interface IncomingRepository extends JpaRepository<Incoming, Integer> {
                     "ORDER BY incoming.transactionDate LIMIT 1"
     )
     Optional<Incoming> getEarliestByProductId(Integer productId);
+
+    @Query(
+            "SELECT COALESCE(SUM(incoming.actualQuantity), 0) " +
+                    "FROM Incoming incoming " +
+                    "WHERE incoming.expirationDate <= :date " +
+                    "AND incoming.product.store.id = :storeId"
+    )
+    Double getTotalNearExpiryItemsByStoreId(Integer storeId, LocalDate date);
 }

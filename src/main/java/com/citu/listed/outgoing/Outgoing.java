@@ -37,17 +37,21 @@ public class Outgoing {
     private Double price;
 
     @Column
+    private Double revenue;
+
+    @Column
     private String comment;
 
     @Column
     private LocalDateTime transactionDate;
 
     @Builder
-    public Outgoing(User user, List<OutProduct> products, OutgoingCategory category, Double price, String comment, LocalDateTime transactionDate) {
+    public Outgoing(User user, List<OutProduct> products, OutgoingCategory category, Double price, Double revenue, String comment, LocalDateTime transactionDate) {
         this.user = user;
         this.products = products;
         this.category = category;
         this.price = price;
+        this.revenue = revenue;
         this.comment = comment;
         this.transactionDate = transactionDate;
     }
