@@ -9,5 +9,5 @@ import java.util.Set;
 
 @Repository
 public interface PermissionRepository extends JpaRepository<Permission, Integer> {
-    Set<Permission> findByUserPermission(UserPermissions userPermission);
+    Permission findByUserPermission(UserPermissions userPermission);
 }
