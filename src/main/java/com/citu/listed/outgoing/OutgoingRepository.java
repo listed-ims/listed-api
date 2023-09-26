@@ -3,11 +3,21 @@ package com.citu.listed.outgoing;
 import com.citu.listed.outgoing.enums.OutgoingCategory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
+@Repository
 public interface OutgoingRepository extends JpaRepository<Outgoing, Integer> {
 
+    @Query(
+            "SELECT COUNT(outgoing) " +
+                    "FROM Outgoing outgoing " +
+                    "WHERE DATE(outgoing.transactionDate) = DATE(:transactionDate)"
+    )
+    Long countByTransactionDate(LocalDateTime transactionDate);
+  
     @Query(
             "SELECT COALESCE(SUM(outgoing.revenue), 0) " +
                     "FROM Outgoing outgoing " +
@@ -30,4 +40,5 @@ public interface OutgoingRepository extends JpaRepository<Outgoing, Integer> {
                     "AND outgoing.category = :salesCategory"
     )
     Double getTotalItemsSoldToday(LocalDate today, Integer storeId, OutgoingCategory salesCategory);
+  
 }

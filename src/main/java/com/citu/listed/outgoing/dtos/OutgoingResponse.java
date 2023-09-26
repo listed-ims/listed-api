@@ -13,6 +13,7 @@ public record OutgoingResponse(
         OutgoingCategory category,
         Double price,
         String comment,
-        LocalDateTime transactionDate
+        LocalDateTime transactionDate,
+        String referenceNumber
 ) {
 }
