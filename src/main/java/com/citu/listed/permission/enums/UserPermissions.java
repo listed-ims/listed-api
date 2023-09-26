@@ -23,6 +23,6 @@ public enum UserPermissions {
     ADD_OUTGOING_CONSUMED,
     GET_OUTGOING_DETAILS,
 
-    GET_TRANSACTIONS_LIST;
+    GET_TRANSACTIONS_LIST,
 
 }

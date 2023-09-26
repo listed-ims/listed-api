@@ -54,7 +54,6 @@ public class User implements UserDetails{
                 );
             }
         }
-        System.out.println(authorities.toString());
         return authorities;
     }
 
