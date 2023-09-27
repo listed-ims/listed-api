@@ -13,8 +13,12 @@ import com.citu.listed.store.StoreRepository;
 import com.citu.listed.user.User;
 import com.citu.listed.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -56,5 +60,31 @@ public class MembershipServiceImplementation implements MembershipService {
                 .build();
 
         return membershipResponseMapper.apply(membershipRepository.save(newMembership));
+    }
+
+    @Override
+    public List<MembershipResponse> getCollaborators(
+            Integer storeId,
+            MembershipStatus membershipStatus,
+            int pageNumber,
+            int pageSize
+    ){
+
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new NotFoundException("Store not found."));
+
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("user.name"));
+        List<Membership> memberships;
+
+        if (membershipStatus == null) {
+            memberships = membershipRepository.findByStore(store, pageable);
+        }else{
+            memberships = membershipRepository.findByStoreAndMembershipStatus(
+                    store, membershipStatus, pageable
+            );
+        }
+        return memberships.stream()
+                .map(membershipResponseMapper)
+                .collect(Collectors.toList());
     }
 }
