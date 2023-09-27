@@ -20,10 +20,8 @@ public class MembershipController {
 
     @PostMapping("")
     public ResponseEntity<MembershipResponse> addCollaborator(
-            @RequestParam Integer userId,
-            @RequestParam Integer storeId,
             @RequestBody @Valid MembershipRequest membership
     ){
-        return new ResponseEntity<>(membershipService.addCollaborator(userId, storeId, membership), HttpStatus.CREATED);
+        return new ResponseEntity<>(membershipService.addCollaborator(membership), HttpStatus.CREATED);
     }
 }

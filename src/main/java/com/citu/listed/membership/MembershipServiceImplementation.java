@@ -29,16 +29,18 @@ public class MembershipServiceImplementation implements MembershipService {
     private final MembershipResponseMapper membershipResponseMapper;
 
     @Override
-    public MembershipResponse addCollaborator(Integer userId, Integer storeId, MembershipRequest membership) {
+    public MembershipResponse addCollaborator(MembershipRequest membership) {
 
-        if (membershipRepository.existsByStore_IdAndUser_Id(storeId, userId)){
+        if (membershipRepository.existsByStore_IdAndUser_Username(
+                membership.getStoreId(), membership.getUsername())
+        ){
             throw new BadRequestException("User is already a collaborator.");
         }
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByUsername(membership.getUsername())
                 .orElseThrow(() -> new NotFoundException("User not found."));
 
-        Store store = storeRepository.findById(storeId)
+        Store store = storeRepository.findById(membership.getStoreId())
                 .orElseThrow(()-> new NotFoundException(("Store not found.")));
 
         Set<Permission> permissions = membership.getUserPermissions()

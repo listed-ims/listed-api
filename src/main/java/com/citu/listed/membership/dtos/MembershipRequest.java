@@ -14,6 +14,13 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MembershipRequest {
+
+    @NotNull(message = "Store ID is required")
+    private Integer storeId;
+
+    @NotNull(message = "Username is required")
+    private String username;
+
     @NotNull(message = "Permission/s is/are required")
     private Set<UserPermissions> userPermissions;
 }
