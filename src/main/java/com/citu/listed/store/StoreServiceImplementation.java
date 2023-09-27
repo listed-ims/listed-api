@@ -18,6 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -84,7 +85,7 @@ public class StoreServiceImplementation implements StoreService {
                         .store(newStore)
                         .user(user)
                         .membershipStatus(MembershipStatus.ACCEPTED)
-                        .permissions(permissionRepository.findByUserPermission(UserPermissions.OWNER))
+                        .permissions(Collections.singleton(permissionRepository.findByUserPermission(UserPermissions.OWNER)))
                         .build());
 
         if(user.getCurrentStoreId() == null)
