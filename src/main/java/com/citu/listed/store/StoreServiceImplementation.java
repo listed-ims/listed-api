@@ -84,7 +84,7 @@ public class StoreServiceImplementation implements StoreService {
                 Membership.builder()
                         .store(newStore)
                         .user(user)
-                        .membershipStatus(MembershipStatus.ACCEPTED)
+                        .membershipStatus(MembershipStatus.ACTIVE)
                         .permissions(Collections.singleton(permissionRepository.findByUserPermission(UserPermissions.OWNER)))
                         .build());
 

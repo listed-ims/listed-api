@@ -1,8 +1,8 @@
 package com.citu.listed.membership.enums;
 
 public enum MembershipStatus {
-    ACCEPTED,
+    ACTIVE,
     DECLINED,
     PENDING,
-    REMOVED
+    INACTIVE
 }
