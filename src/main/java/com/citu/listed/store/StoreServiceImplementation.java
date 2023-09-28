@@ -1,5 +1,8 @@
 package com.citu.listed.store;
 
+import com.citu.listed.membership.enums.MembershipStatus;
+import com.citu.listed.permission.PermissionRepository;
+import com.citu.listed.permission.enums.UserPermissions;
 import com.citu.listed.shared.exception.NotFoundException;
 import com.citu.listed.membership.Membership;
 import com.citu.listed.membership.MembershipRepository;
@@ -15,6 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -28,6 +32,7 @@ public class StoreServiceImplementation implements StoreService {
     private final MembershipRepository membershipRepository;
     private final JwtService jwtService;
     private final StoreResponseMapper storeResponseMapper;
+    private final PermissionRepository permissionRepository;
 
     @Override
     public List<StoreResponse> getStores(
@@ -79,6 +84,8 @@ public class StoreServiceImplementation implements StoreService {
                 Membership.builder()
                         .store(newStore)
                         .user(user)
+                        .membershipStatus(MembershipStatus.ACTIVE)
+                        .permissions(Collections.singleton(permissionRepository.findByUserPermission(UserPermissions.OWNER)))
                         .build());
 
         if(user.getCurrentStoreId() == null)

@@ -17,6 +17,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -43,6 +45,7 @@ public class OutgoingServiceImplementation implements OutgoingService {
         List<OutProduct> outProducts = new ArrayList<>();
 
         Double totalPrice = 0.0;
+        Double totalRevenue = 0.0;
 
         for (OutProductRequest outProduct:request.getProducts()) {
 
@@ -53,8 +56,8 @@ public class OutgoingServiceImplementation implements OutgoingService {
                .orElseThrow(() -> new NotFoundException("Product not found."));
 
             Double quantity = outProduct.getQuantity();
-
             Double price = calculatePrice(quantity, product.getSalePrice());
+            Double purchasePrice = 0.0;
 
             OutProduct newOutProduct = OutProduct.builder()
                 .product(product)
@@ -73,13 +76,19 @@ public class OutgoingServiceImplementation implements OutgoingService {
 
                 if(quantity >= actualQuantity) {
                     incoming.setActualQuantity(0.0);
+                    purchasePrice += actualQuantity * incoming.getPurchasePrice();
                     quantity -= actualQuantity;
                 } else {
                     incoming.setActualQuantity(actualQuantity - quantity);
+                    purchasePrice += quantity * incoming.getPurchasePrice();
                     quantity = 0.0;
                 }
             }
+
+            totalRevenue += price - purchasePrice;
         }
+
+        LocalDateTime transactionDate = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
 
         Outgoing newOutgoing = Outgoing.builder()
                 .user(user)
@@ -88,6 +97,8 @@ public class OutgoingServiceImplementation implements OutgoingService {
                 .transactionDate(LocalDateTime.now())
                 .comment(request.getComment())
                 .price(totalPrice)
+                .referenceNumber(getReferenceNumber(transactionDate))
+                .revenue(totalRevenue)
                 .build();
 
         outgoingRepository.save(newOutgoing);
@@ -104,5 +115,11 @@ public class OutgoingServiceImplementation implements OutgoingService {
         outgoing = outgoingRepository.findByProductsProductStoreId(storeId);
 
         return outgoing.stream().map(outgoingResponseMapper).collect(Collectors.toList());
+    }
+
+    private String getReferenceNumber(LocalDateTime transactionDate) {
+        return transactionDate.format(DateTimeFormatter.ofPattern("MMddyy"))
+                + "-"
+                + (outgoingRepository.countByTransactionDate(transactionDate) + 1);
     }
 }

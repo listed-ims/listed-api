@@ -1,11 +1,13 @@
 package com.citu.listed.user;
 
+import com.citu.listed.membership.Membership;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
+import java.util.*;
 
 @Entity
 @Table(name = "users")
@@ -30,6 +32,9 @@ public class User implements UserDetails{
     @Column
     private Integer currentStoreId;
 
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    private Set<Membership> memberships;
+
     @Builder
     public User(String name, String username, String password) {
         this.name = name;
@@ -40,7 +45,16 @@ public class User implements UserDetails{
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+
+        for (Membership membership : this.getMemberships()) {
+            for (SimpleGrantedAuthority authority: membership.getAuthorities()) {
+                authorities.add(
+                        new SimpleGrantedAuthority(membership.getStore().getId()+"_"+authority.getAuthority())
+                );
+            }
+        }
+        return authorities;
     }
 
     @Override
