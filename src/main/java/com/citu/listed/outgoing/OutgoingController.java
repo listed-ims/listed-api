@@ -27,4 +27,9 @@ public class OutgoingController {
 
         return new ResponseEntity<>(outgoingResponse, HttpStatus.CREATED);
     }
+    
+    @GetMapping("/outgoing/{id}")
+    public ResponseEntity<Object> getOutgoingTransaction(@PathVariable Integer id){
+        return new ResponseEntity<>(outgoingService.getOutgoingTransaction(id),HttpStatus.OK);
+    }
 }

@@ -40,5 +40,5 @@ public interface OutgoingRepository extends JpaRepository<Outgoing, Integer> {
                     "AND outgoing.category = :salesCategory"
     )
     Double getTotalItemsSoldToday(LocalDate today, Integer storeId, OutgoingCategory salesCategory);
-  
+
 }
