@@ -27,4 +27,9 @@ public class OutgoingController {
 
         return new ResponseEntity<>(outgoingResponse, HttpStatus.CREATED);
     }
+
+    @GetMapping("/outgoing")
+    public ResponseEntity<Object> getOutgoingTransactions(@RequestParam Integer storeId){
+        return new ResponseEntity<>(outgoingService.getOutgoingTransactions(storeId),HttpStatus.OK);
+    }
 }

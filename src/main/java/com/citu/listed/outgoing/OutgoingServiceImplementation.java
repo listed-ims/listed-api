@@ -2,6 +2,7 @@ package com.citu.listed.outgoing;
 
 import com.citu.listed.incoming.Incoming;
 import com.citu.listed.incoming.IncomingRepository;
+import com.citu.listed.incoming.dtos.IncomingResponse;
 import com.citu.listed.outgoing.dtos.OutProductRequest;
 import com.citu.listed.outgoing.dtos.OutgoingRequest;
 import com.citu.listed.outgoing.dtos.OutgoingResponse;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -95,5 +97,12 @@ public class OutgoingServiceImplementation implements OutgoingService {
 
     private double calculatePrice(Double quantity, Double price){
         return quantity * price;
+    }
+    @Override
+    public List<OutgoingResponse> getOutgoingTransactions(Integer storeId){
+        List<Outgoing> outgoing;
+        outgoing = outgoingRepository.findByProductsProductStoreId(storeId);
+
+        return outgoing.stream().map(outgoingResponseMapper).collect(Collectors.toList());
     }
 }
