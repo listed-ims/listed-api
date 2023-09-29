@@ -20,6 +20,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +33,7 @@ public class OutgoingServiceImplementation implements OutgoingService {
     private final OutProductRepository outProductRepository;
     private final OutgoingRepository outgoingRepository;
     private final OutgoingResponseMapper outgoingResponseMapper;
+
 
     @Override
     @Transactional
@@ -113,4 +115,11 @@ public class OutgoingServiceImplementation implements OutgoingService {
                 + "-"
                 + (outgoingRepository.countByTransactionDate(transactionDate) + 1);
     }
+    @Override
+    public OutgoingResponse getOutgoingTransaction(Integer id) {
+        Optional<Outgoing> outgoingProduct = outgoingRepository.findById(id);
+        return outgoingProduct.map(outgoingResponseMapper)
+                .orElseThrow(() -> new NotFoundException("Outgoing product not found."));
+    }
+
 }
