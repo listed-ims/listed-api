@@ -5,11 +5,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Repository
 public interface OutgoingRepository extends JpaRepository<Outgoing, Integer> {
+    List<Outgoing> findByProductsProductStoreId(Integer storeId);
 
     @Query(
             "SELECT COUNT(outgoing) " +
@@ -17,7 +20,7 @@ public interface OutgoingRepository extends JpaRepository<Outgoing, Integer> {
                     "WHERE DATE(outgoing.transactionDate) = DATE(:transactionDate)"
     )
     Long countByTransactionDate(LocalDateTime transactionDate);
-  
+
     @Query(
             "SELECT COALESCE(SUM(outgoing.revenue), 0) " +
                     "FROM Outgoing outgoing " +
