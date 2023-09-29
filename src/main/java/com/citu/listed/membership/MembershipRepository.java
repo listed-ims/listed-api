@@ -13,5 +13,7 @@ import java.util.List;
 public interface MembershipRepository extends JpaRepository<Membership, Integer> {
     boolean existsByStoreAndUser(Store store, User user);
     List<Membership> findByStoreAndMembershipStatus(Store store, MembershipStatus membershipStatus, Pageable pageable);
+    Membership findByStoreAndMembershipStatusAndUser(Store store, MembershipStatus membershipStatus, User user);
     List<Membership> findByStore(Store store, Pageable pageable);
+    Membership findByStoreAndUser(Store store, User user);
 }

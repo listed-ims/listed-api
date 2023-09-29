@@ -32,6 +32,7 @@ public class MembershipController {
     public ResponseEntity<List<MembershipResponse>> getCollaborators(
             @RequestParam Integer storeId,
             @RequestParam(defaultValue = "") MembershipStatus membershipStatus,
+            @RequestParam(defaultValue = "") Integer userId,
             @RequestParam(defaultValue = "1") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize
             ){
@@ -39,6 +40,7 @@ public class MembershipController {
                 membershipService.getCollaborators(
                         storeId,
                         membershipStatus,
+                        userId,
                         pageNumber,
                         pageSize
                 ), HttpStatus.OK
