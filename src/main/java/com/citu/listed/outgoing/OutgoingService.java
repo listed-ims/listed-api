@@ -8,5 +8,5 @@ import java.util.List;
 public interface OutgoingService {
     OutgoingResponse outProducts(String token, OutgoingRequest request);
     List<OutgoingResponse> getOutgoingTransactions(Integer storeId);
-
+    OutgoingResponse getOutgoingTransaction(Integer id);
 }

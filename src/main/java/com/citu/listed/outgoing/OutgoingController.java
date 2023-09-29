@@ -32,4 +32,9 @@ public class OutgoingController {
     public ResponseEntity<Object> getOutgoingTransactions(@RequestParam Integer storeId){
         return new ResponseEntity<>(outgoingService.getOutgoingTransactions(storeId),HttpStatus.OK);
     }
+    
+    @GetMapping("/outgoing/{id}")
+    public ResponseEntity<Object> getOutgoingTransaction(@PathVariable Integer id){
+        return new ResponseEntity<>(outgoingService.getOutgoingTransaction(id),HttpStatus.OK);
+    }
 }
