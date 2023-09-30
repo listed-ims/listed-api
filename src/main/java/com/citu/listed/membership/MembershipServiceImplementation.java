@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -64,6 +65,7 @@ public class MembershipServiceImplementation implements MembershipService {
     public List<MembershipResponse> getCollaborators(
             Integer storeId,
             MembershipStatus membershipStatus,
+            Integer userId,
             int pageNumber,
             int pageSize
     ){
@@ -71,15 +73,31 @@ public class MembershipServiceImplementation implements MembershipService {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new NotFoundException("Store not found."));
 
+        User user = null;
+        if (userId != null) {
+            user = userRepository.findById(userId)
+                    .orElseThrow(() -> new NotFoundException("User not found."));
+        }
+
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("user.name"));
         List<Membership> memberships;
 
-        if (membershipStatus == null) {
-            memberships = membershipRepository.findByStore(store, pageable);
+        if (user == null) {
+            if (membershipStatus == null) {
+                memberships = membershipRepository.findByStore(store, pageable);
+            }else{
+                memberships = membershipRepository.
+                        findByStoreAndMembershipStatus( store, membershipStatus, pageable );
+            }
         }else{
-            memberships = membershipRepository.findByStoreAndMembershipStatus(
-                    store, membershipStatus, pageable
-            );
+            if (membershipStatus == null) {
+                memberships = Collections.singletonList(
+                        membershipRepository.findByStoreAndUser(store, user)
+                );
+            }else{
+                memberships = Collections.singletonList(
+                        membershipRepository.findByStoreAndMembershipStatusAndUser(store, membershipStatus, user));
+            }
         }
         return memberships.stream()
                 .map(membershipResponseMapper)

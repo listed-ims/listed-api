@@ -11,6 +11,7 @@ public interface MembershipService {
     List<MembershipResponse> getCollaborators(
             Integer storeId,
             MembershipStatus membershipStatus,
+            Integer userId,
             int pageNumber,
             int pageSize
     );
