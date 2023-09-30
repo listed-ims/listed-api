@@ -7,7 +7,8 @@ import com.citu.listed.user.dtos.UserResponse;
 import java.util.Set;
 
 public record MembershipResponse (
-  UserResponse user,
-  Set<UserPermissions> permissions,
-  MembershipStatus membershipStatus
+        Integer id,
+        UserResponse user,
+        Set<UserPermissions> permissions,
+        MembershipStatus membershipStatus
 ){}
