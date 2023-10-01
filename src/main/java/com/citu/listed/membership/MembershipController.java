@@ -46,4 +46,9 @@ public class MembershipController {
                 ), HttpStatus.OK
         );
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<MembershipResponse> getCollaborator(@PathVariable Integer id){
+        return new ResponseEntity<>(membershipService.getCollaborator(id), HttpStatus.OK);
+    }
 }

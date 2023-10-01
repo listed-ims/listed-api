@@ -19,6 +19,7 @@ public class MembershipResponseMapper implements Function<Membership, Membership
     @Override
     public MembershipResponse apply(Membership membership){
         return new MembershipResponse(
+                membership.getId(),
                 userResponseMapper.apply(membership.getUser()),
                 membership.getPermissions()
                         .stream()

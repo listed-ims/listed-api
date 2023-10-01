@@ -15,4 +15,5 @@ public interface MembershipService {
             int pageNumber,
             int pageSize
     );
+    MembershipResponse getCollaborator(Integer membershipId);
 }

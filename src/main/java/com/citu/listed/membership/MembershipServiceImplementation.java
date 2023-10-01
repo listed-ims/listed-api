@@ -100,7 +100,16 @@ public class MembershipServiceImplementation implements MembershipService {
             }
         }
         return memberships.stream()
+                .filter(( membership )-> !membership.getMembershipStatus().equals(MembershipStatus.DECLINED))
                 .map(membershipResponseMapper)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public MembershipResponse getCollaborator(Integer membershipId){
+        Membership membership = membershipRepository.findById(membershipId)
+                .orElseThrow(() -> new NotFoundException("Membership not found."));
+
+        return membershipResponseMapper.apply(membership);
     }
 }
