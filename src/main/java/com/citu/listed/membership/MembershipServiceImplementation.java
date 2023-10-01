@@ -6,6 +6,7 @@ import com.citu.listed.membership.enums.MembershipStatus;
 import com.citu.listed.membership.mappers.MembershipResponseMapper;
 import com.citu.listed.permission.Permission;
 import com.citu.listed.permission.PermissionRepository;
+import com.citu.listed.permission.enums.UserPermissions;
 import com.citu.listed.shared.exception.BadRequestException;
 import com.citu.listed.shared.exception.NotFoundException;
 import com.citu.listed.store.Store;
@@ -35,7 +36,6 @@ public class MembershipServiceImplementation implements MembershipService {
 
     @Override
     public MembershipResponse addCollaborator(MembershipRequest membership) {
-
         User user = userRepository.findByUsername(membership.getUsername())
                 .orElseThrow(() -> new NotFoundException("User not found."));
 
@@ -111,5 +111,28 @@ public class MembershipServiceImplementation implements MembershipService {
                 .orElseThrow(() -> new NotFoundException("Membership not found."));
 
         return membershipResponseMapper.apply(membership);
+    }
+
+    @Override
+    public MembershipResponse updateCollaborator(
+            Integer id,
+            Set<UserPermissions> userPermissions,
+            MembershipStatus membershipStatus
+    ){
+        Membership membership = membershipRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Membership does not exist."));
+
+        if (userPermissions != null && !userPermissions.isEmpty()) {
+            Set<Permission> permissions =  userPermissions.stream()
+                    .map(permissionRepository::findByUserPermission)
+                            .collect(Collectors.toSet());
+            membership.setPermissions(permissions);
+        }
+
+        if (membershipStatus != null) {
+            membership.setMembershipStatus(membershipStatus);
+        }
+
+        return membershipResponseMapper.apply(membershipRepository.save(membership));
     }
 }
