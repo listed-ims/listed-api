@@ -36,7 +36,7 @@ public class UserController {
         return ResponseEntity.ok(userService.authenticate(request));
     }
 
-    @PostMapping("users/validation/username")
+    @GetMapping("users/validation/username")
     public ResponseEntity<Object> validateUsername(@RequestParam String username){
         return new ResponseEntity<>(
                 new ValidationResponse(userService.validateUsername(username)),
