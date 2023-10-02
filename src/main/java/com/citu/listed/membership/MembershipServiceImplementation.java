@@ -20,10 +20,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -140,8 +137,10 @@ public class MembershipServiceImplementation implements MembershipService {
         User user = membership.getUser();
         if (membershipStatus != null) {
             if(membershipStatus == MembershipStatus.DECLINED){
-                user.setCurrentStoreId(null);
-                userRepository.save(user);
+                if(Objects.equals(user.getCurrentStoreId(), membership.getStore().getId())) {
+                    user.setCurrentStoreId(null);
+                    userRepository.save(user);
+                }
                 membership.setPermissions(new HashSet<>());
                 membership.setMembershipStatus(membershipStatus);
             }
