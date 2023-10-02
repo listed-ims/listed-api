@@ -1,6 +1,7 @@
 package com.citu.listed.product.mappers;
 
 import com.citu.listed.incoming.IncomingRepository;
+import com.citu.listed.outgoing.OutgoingRepository;
 import com.citu.listed.product.Product;
 import com.citu.listed.product.dtos.ProductResponse;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import java.util.function.Function;
 public class ProductResponseMapper implements Function<Product, ProductResponse> {
 
     private final IncomingRepository incomingRepository;
+    private final OutgoingRepository outgoingRepository;
 
     @Override
     public ProductResponse apply(Product product) {
@@ -26,7 +28,7 @@ public class ProductResponseMapper implements Function<Product, ProductResponse>
                 product.getUnit(),
                 incomingRepository.getTotalQuantityByProductId(product.getId()),
                 incomingRepository.getTotalInByProductId(product.getId()),
-                0.0
+                outgoingRepository.getTotalOutByProductId(product.getId())
         );
     }
 
