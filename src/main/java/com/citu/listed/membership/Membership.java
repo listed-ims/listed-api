@@ -10,6 +10,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Where;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.HashSet;
@@ -18,6 +19,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "memberships")
+@Where(clause = "membership_status != 'DECLINED'")
 @Getter
 @Setter
 @NoArgsConstructor

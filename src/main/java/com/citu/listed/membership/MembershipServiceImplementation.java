@@ -18,10 +18,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,6 +34,7 @@ public class MembershipServiceImplementation implements MembershipService {
     private final MembershipResponseMapper membershipResponseMapper;
 
     @Override
+    @Transactional
     public MembershipResponse addCollaborator(MembershipRequest membership) {
         User user = userRepository.findByUsername(membership.getUsername())
                 .orElseThrow(() -> new NotFoundException("User not found."));
@@ -51,14 +51,20 @@ public class MembershipServiceImplementation implements MembershipService {
                 .map(permissionRepository::findByUserPermission)
                 .collect(Collectors.toSet());
 
-        Membership newMembership = Membership.builder()
-                .user(user)
-                .store(store)
-                .permissions(permissions)
-                .membershipStatus(MembershipStatus.PENDING)
-                .build();
+        Membership newMembership = membershipRepository.save(
+                Membership.builder()
+                        .user(user)
+                        .store(store)
+                        .permissions(permissions)
+                        .membershipStatus(MembershipStatus.PENDING)
+                        .build());
 
-        return membershipResponseMapper.apply(membershipRepository.save(newMembership));
+        if(user.getCurrentStoreId() == null){
+            user.setCurrentStoreId(membership.getStoreId());
+            userRepository.save(user);
+        }
+
+        return membershipResponseMapper.apply(newMembership);
     }
 
     @Override
@@ -100,7 +106,6 @@ public class MembershipServiceImplementation implements MembershipService {
             }
         }
         return memberships.stream()
-                .filter(( membership )-> !membership.getMembershipStatus().equals(MembershipStatus.DECLINED))
                 .map(membershipResponseMapper)
                 .collect(Collectors.toList());
     }
@@ -114,6 +119,7 @@ public class MembershipServiceImplementation implements MembershipService {
     }
 
     @Override
+    @Transactional
     public MembershipResponse updateCollaborator(
             Integer id,
             Set<UserPermissions> userPermissions,
@@ -128,8 +134,16 @@ public class MembershipServiceImplementation implements MembershipService {
                             .collect(Collectors.toSet());
             membership.setPermissions(permissions);
         }
-
+        User user = membership.getUser();
         if (membershipStatus != null) {
+            if(membershipStatus == MembershipStatus.DECLINED){
+                if(Objects.equals(user.getCurrentStoreId(), membership.getStore().getId())) {
+                    user.setCurrentStoreId(null);
+                    userRepository.save(user);
+                }
+                membership.setPermissions(new HashSet<>());
+                membership.setMembershipStatus(membershipStatus);
+            }
             membership.setMembershipStatus(membershipStatus);
         }
 
