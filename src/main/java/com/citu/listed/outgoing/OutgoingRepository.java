@@ -1,6 +1,9 @@
 package com.citu.listed.outgoing;
 
+import com.citu.listed.incoming.Incoming;
 import com.citu.listed.outgoing.enums.OutgoingCategory;
+import com.citu.listed.store.Store;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -12,7 +15,27 @@ import java.time.LocalDateTime;
 
 @Repository
 public interface OutgoingRepository extends JpaRepository<Outgoing, Integer> {
-    List<Outgoing> findByProductsProductStoreId(Integer storeId);
+
+    @Query(
+            "SELECT outgoing " +
+                    "FROM Outgoing outgoing " +
+                    "JOIN outgoing.products outProduct " +
+                    "WHERE outProduct.product.store = :store " +
+                    "AND (:startDate IS NULL OR DATE(outgoing.transactionDate) >= :startDate) " +
+                    "AND (:endDate IS NULL OR DATE(outgoing.transactionDate) <= :endDate) " +
+                    "AND (:productId IS NULL OR outProduct.product.id = :productId) " +
+                    "AND (:userId IS NULL OR outgoing.user.id = :userId) " +
+                    "AND (:category IS NULL OR outgoing.category = :category)"
+    )
+    List<Outgoing> getByStoreId(
+            Store store,
+            Integer userId,
+            Integer productId,
+            LocalDate startDate,
+            LocalDate endDate,
+            OutgoingCategory category,
+            Pageable pageable
+    );
 
     @Query(
             "SELECT COUNT(outgoing) " +

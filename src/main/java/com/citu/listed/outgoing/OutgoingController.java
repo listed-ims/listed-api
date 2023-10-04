@@ -2,12 +2,16 @@ package com.citu.listed.outgoing;
 
 import com.citu.listed.outgoing.dtos.OutgoingRequest;
 import com.citu.listed.outgoing.dtos.OutgoingResponse;
+import com.citu.listed.outgoing.enums.OutgoingCategory;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 @RestController
 @CrossOrigin
@@ -29,8 +33,30 @@ public class OutgoingController {
     }
 
     @GetMapping("/outgoing")
-    public ResponseEntity<Object> getOutgoingTransactions(@RequestParam Integer storeId){
-        return new ResponseEntity<>(outgoingService.getOutgoingTransactions(storeId),HttpStatus.OK);
+    public ResponseEntity<Object> getOutgoingTransactions(
+            @RequestParam Integer storeId,
+            @RequestParam(required = false) Integer productId,
+            @RequestParam(required = false) Integer userId,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate,
+            @RequestParam(required = false)OutgoingCategory category,
+            @RequestParam(defaultValue = "1") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "ASC") Sort.Direction sortOrder
+    ){
+        return new ResponseEntity<>(
+                outgoingService.getOutgoingTransactions(
+                        storeId,
+                        userId,
+                        productId,
+                        startDate,
+                        endDate,
+                        category,
+                        pageNumber,
+                        pageSize,
+                        sortOrder
+                )
+                ,HttpStatus.OK);
     }
     
     @GetMapping("/outgoing/{id}")
