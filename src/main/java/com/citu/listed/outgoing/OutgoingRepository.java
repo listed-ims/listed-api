@@ -44,4 +44,11 @@ public interface OutgoingRepository extends JpaRepository<Outgoing, Integer> {
     )
     Double getTotalItemsSoldToday(LocalDate today, Integer storeId, OutgoingCategory salesCategory);
 
+    @Query(
+            "SELECT COALESCE(SUM(outProduct.quantity), 0) " +
+                    "FROM Outgoing outgoing " +
+                    "JOIN outgoing.products outProduct " +
+                    "WHERE outProduct.product.id = :productId"
+    )
+    Double getTotalOutByProductId(Integer productId);
 }
