@@ -5,11 +5,14 @@ import com.citu.listed.incoming.dtos.IncomingResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 @Tag(name = "Incoming")
 @RestController
@@ -33,8 +36,29 @@ public class IncomingController {
     }
 
     @GetMapping("/incoming")
-    public ResponseEntity<Object> getIncomingTransactions(@RequestParam Integer storeId){
-        return new ResponseEntity<>(incomingService.getIncomingTransactions(storeId),HttpStatus.OK);
+    public ResponseEntity<Object> getIncomingTransactions(
+            @RequestParam Integer storeId,
+            @RequestParam(required = false) Integer productId,
+            @RequestParam(required = false) Integer userId,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate,
+            @RequestParam(defaultValue = "1") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "ASC") Sort.Direction sortOrder
+    ){
+        return new ResponseEntity<>(
+                incomingService.getIncomingTransactions(
+                        storeId,
+                        userId,
+                        productId,
+                        startDate,
+                        endDate,
+                        pageNumber,
+                        pageSize,
+                        sortOrder
+                ),
+                HttpStatus.OK
+        );
     }
 
     @GetMapping("/incoming/{id}")
