@@ -67,7 +67,7 @@ public class IncomingServiceImplementation implements IncomingService {
     @Override
     public List<IncomingResponse> getIncomingTransactions(
             Integer storeId,
-            Integer userId,
+            List<Integer> userIds,
             Integer productId,
             LocalDate startDate,
             LocalDate endDate,
@@ -86,7 +86,7 @@ public class IncomingServiceImplementation implements IncomingService {
 
         List<Incoming> incoming = incomingRepository.getByStoreId(
                 store,
-                userId,
+                userIds.size() > 0 ? userIds : null,
                 productId,
                 startDate,
                 endDate, pageable

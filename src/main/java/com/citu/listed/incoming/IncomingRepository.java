@@ -21,11 +21,11 @@ public interface IncomingRepository extends JpaRepository<Incoming, Integer> {
                     "AND (:startDate IS NULL OR DATE(incoming.transactionDate) >= :startDate) " +
                     "AND (:endDate IS NULL OR DATE(incoming.transactionDate) <= :endDate) " +
                     "AND (:productId IS NULL OR incoming.product.id = :productId) " +
-                    "AND (:userId IS NULL OR incoming.user.id = :userId)"
+                    "AND (:#{#userIds == null} = true OR incoming.user.id IN :userIds)"
     )
     List<Incoming> getByStoreId(
             Store store,
-            Integer userId,
+            List<Integer> userIds,
             Integer productId,
             LocalDate startDate,
             LocalDate endDate,

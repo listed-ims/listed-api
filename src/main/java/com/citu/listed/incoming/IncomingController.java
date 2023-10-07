@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Tag(name = "Incoming")
 @RestController
@@ -38,8 +39,8 @@ public class IncomingController {
     @GetMapping("/incoming")
     public ResponseEntity<Object> getIncomingTransactions(
             @RequestParam Integer storeId,
+            @RequestParam(defaultValue = "") List<Integer> userIds,
             @RequestParam(required = false) Integer productId,
-            @RequestParam(required = false) Integer userId,
             @RequestParam(required = false) LocalDate startDate,
             @RequestParam(required = false) LocalDate endDate,
             @RequestParam(defaultValue = "1") int pageNumber,
@@ -49,7 +50,7 @@ public class IncomingController {
         return new ResponseEntity<>(
                 incomingService.getIncomingTransactions(
                         storeId,
-                        userId,
+                        userIds,
                         productId,
                         startDate,
                         endDate,
