@@ -24,16 +24,16 @@ public interface OutgoingRepository extends JpaRepository<Outgoing, Integer> {
                     "AND (:startDate IS NULL OR DATE(outgoing.transactionDate) >= :startDate) " +
                     "AND (:endDate IS NULL OR DATE(outgoing.transactionDate) <= :endDate) " +
                     "AND (:productId IS NULL OR outProduct.product.id = :productId) " +
-                    "AND (:userId IS NULL OR outgoing.user.id = :userId) " +
-                    "AND (:category IS NULL OR outgoing.category = :category)"
+                    "AND (:#{#userIds == null} = true OR outgoing.user.id IN :userIds) " +
+                    "AND (:#{#categories == null} = true OR outgoing.category IN :categories)"
     )
     List<Outgoing> getByStoreId(
             Store store,
-            Integer userId,
+            List<Integer> userIds,
             Integer productId,
             LocalDate startDate,
             LocalDate endDate,
-            OutgoingCategory category,
+            List<OutgoingCategory> categories,
             Pageable pageable
     );
 

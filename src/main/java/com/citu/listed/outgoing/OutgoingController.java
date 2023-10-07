@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @CrossOrigin
@@ -35,11 +36,11 @@ public class OutgoingController {
     @GetMapping("/outgoing")
     public ResponseEntity<Object> getOutgoingTransactions(
             @RequestParam Integer storeId,
+            @RequestParam(defaultValue = "") List<Integer> userIds,
             @RequestParam(required = false) Integer productId,
-            @RequestParam(required = false) Integer userId,
             @RequestParam(required = false) LocalDate startDate,
             @RequestParam(required = false) LocalDate endDate,
-            @RequestParam(required = false)OutgoingCategory category,
+            @RequestParam(defaultValue = "") List<OutgoingCategory> categories,
             @RequestParam(defaultValue = "1") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "ASC") Sort.Direction sortOrder
@@ -47,11 +48,11 @@ public class OutgoingController {
         return new ResponseEntity<>(
                 outgoingService.getOutgoingTransactions(
                         storeId,
-                        userId,
+                        userIds,
                         productId,
                         startDate,
                         endDate,
-                        category,
+                        categories,
                         pageNumber,
                         pageSize,
                         sortOrder

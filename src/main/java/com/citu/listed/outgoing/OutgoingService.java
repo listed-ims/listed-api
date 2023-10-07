@@ -12,11 +12,11 @@ public interface OutgoingService {
     OutgoingResponse outProducts(String token, OutgoingRequest request);
     List<OutgoingResponse> getOutgoingTransactions(
             Integer storeId,
-            Integer userId,
+            List<Integer> userIds,
             Integer productId,
             LocalDate startDate,
             LocalDate endDate,
-            OutgoingCategory category,
+            List<OutgoingCategory> category,
             int pageNumber,
             int pageSize,
             Sort.Direction sortOrder

@@ -120,11 +120,11 @@ public class OutgoingServiceImplementation implements OutgoingService {
     @Override
     public List<OutgoingResponse> getOutgoingTransactions(
             Integer storeId,
-            Integer userId,
+            List<Integer> userIds,
             Integer productId,
             LocalDate startDate,
             LocalDate endDate,
-            OutgoingCategory category,
+            List<OutgoingCategory> categories,
             int pageNumber,
             int pageSize,
             Sort.Direction sortOrder
@@ -140,11 +140,11 @@ public class OutgoingServiceImplementation implements OutgoingService {
 
         List<Outgoing> outgoing = outgoingRepository.getByStoreId(
                 store,
-                userId,
+                userIds.size() > 0 ? userIds : null,
                 productId,
                 startDate,
                 endDate,
-                category, 
+                categories.size() > 0 ? categories : null,
                 pageable
         );
 
