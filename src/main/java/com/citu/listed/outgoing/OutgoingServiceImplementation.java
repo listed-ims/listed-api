@@ -6,16 +6,24 @@ import com.citu.listed.incoming.dtos.IncomingResponse;
 import com.citu.listed.outgoing.dtos.OutProductRequest;
 import com.citu.listed.outgoing.dtos.OutgoingRequest;
 import com.citu.listed.outgoing.dtos.OutgoingResponse;
+import com.citu.listed.outgoing.enums.OutgoingCategory;
 import com.citu.listed.outgoing.mappers.OutgoingResponseMapper;
 import com.citu.listed.product.Product;
 import com.citu.listed.product.ProductRepository;
 import com.citu.listed.shared.exception.NotFoundException;
+import com.citu.listed.store.Store;
+import com.citu.listed.store.StoreRepository;
 import com.citu.listed.user.User;
 import com.citu.listed.user.UserRepository;
 import com.citu.listed.user.config.JwtService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -31,9 +39,10 @@ public class OutgoingServiceImplementation implements OutgoingService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final IncomingRepository incomingRepository;
-    private final JwtService jwtService;
     private final OutProductRepository outProductRepository;
     private final OutgoingRepository outgoingRepository;
+    private final StoreRepository storeRepository;
+    private final JwtService jwtService;
     private final OutgoingResponseMapper outgoingResponseMapper;
 
 
@@ -108,13 +117,36 @@ public class OutgoingServiceImplementation implements OutgoingService {
         return outgoingResponseMapper.apply(newOutgoing);
     }
 
-    private double calculatePrice(Double quantity, Double price){
-        return quantity * price;
-    }
     @Override
-    public List<OutgoingResponse> getOutgoingTransactions(Integer storeId){
-        List<Outgoing> outgoing;
-        outgoing = outgoingRepository.findByProductsProductStoreId(storeId);
+    public List<OutgoingResponse> getOutgoingTransactions(
+            Integer storeId,
+            List<Integer> userIds,
+            Integer productId,
+            LocalDate startDate,
+            LocalDate endDate,
+            List<OutgoingCategory> categories,
+            int pageNumber,
+            int pageSize,
+            Sort.Direction sortOrder
+    ){
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new NotFoundException("Store not found."));
+
+        Pageable pageable = PageRequest.of(
+                pageNumber - 1,
+                pageSize,
+                Sort.by(sortOrder,"transactionDate")
+        );
+
+        List<Outgoing> outgoing = outgoingRepository.getByStoreId(
+                store,
+                userIds.size() > 0 ? userIds : null,
+                productId,
+                startDate,
+                endDate,
+                categories.size() > 0 ? categories : null,
+                pageable
+        );
 
         return outgoing.stream().map(outgoingResponseMapper).collect(Collectors.toList());
     }
@@ -131,4 +163,7 @@ public class OutgoingServiceImplementation implements OutgoingService {
                 .orElseThrow(() -> new NotFoundException("Outgoing product not found."));
     }
 
+    private double calculatePrice(Double quantity, Double price){
+        return quantity * price;
+    }
 }
