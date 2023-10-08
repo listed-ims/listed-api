@@ -19,13 +19,16 @@ public interface OutgoingRepository extends JpaRepository<Outgoing, Integer> {
     @Query(
             "SELECT outgoing " +
                     "FROM Outgoing outgoing " +
-                    "JOIN outgoing.products outProduct " +
-                    "WHERE outProduct.product.store = :store " +
-                    "AND (:startDate IS NULL OR DATE(outgoing.transactionDate) >= :startDate) " +
-                    "AND (:endDate IS NULL OR DATE(outgoing.transactionDate) <= :endDate) " +
-                    "AND (:productId IS NULL OR outProduct.product.id = :productId) " +
-                    "AND (:#{#userIds == null} = true OR outgoing.user.id IN :userIds) " +
-                    "AND (:#{#categories == null} = true OR outgoing.category IN :categories)"
+                    "WHERE outgoing.id IN " +
+                    "(SELECT DISTINCT outgoing.id " +
+                            "FROM Outgoing outgoing " +
+                            "JOIN outgoing.products outProduct " +
+                            "WHERE outProduct.product.store = :store " +
+                            "AND (:startDate IS NULL OR DATE(outgoing.transactionDate) >= :startDate) " +
+                            "AND (:endDate IS NULL OR DATE(outgoing.transactionDate) <= :endDate) " +
+                            "AND (:productId IS NULL OR outProduct.product.id = :productId) " +
+                            "AND (:#{#userIds == null} = true OR outgoing.user.id IN :userIds) " +
+                            "AND (:#{#categories == null} = true OR outgoing.category IN :categories))"
     )
     List<Outgoing> getByStoreId(
             Store store,

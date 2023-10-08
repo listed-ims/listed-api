@@ -2,7 +2,6 @@ package com.citu.listed.outgoing;
 
 import com.citu.listed.incoming.Incoming;
 import com.citu.listed.incoming.IncomingRepository;
-import com.citu.listed.incoming.dtos.IncomingResponse;
 import com.citu.listed.outgoing.dtos.OutProductRequest;
 import com.citu.listed.outgoing.dtos.OutgoingRequest;
 import com.citu.listed.outgoing.dtos.OutgoingResponse;
