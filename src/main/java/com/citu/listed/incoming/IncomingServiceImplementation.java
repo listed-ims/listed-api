@@ -6,11 +6,18 @@ import com.citu.listed.incoming.dtos.IncomingResponse;
 import com.citu.listed.incoming.mappers.IncomingResponseMapper;
 import com.citu.listed.product.Product;
 import com.citu.listed.product.ProductRepository;
+import com.citu.listed.store.Store;
+import com.citu.listed.store.StoreRepository;
 import com.citu.listed.user.User;
 import com.citu.listed.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import com.citu.listed.user.config.JwtService;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -24,8 +31,9 @@ public class IncomingServiceImplementation implements IncomingService {
 
     private final IncomingRepository incomingRepository;
     private final ProductRepository productRepository;
-    private final JwtService jwtService;
     private final UserRepository userRepository;
+    private final StoreRepository storeRepository;
+    private final JwtService jwtService;
     private final IncomingResponseMapper incomingResponseMapper;
 
     @Override
@@ -56,16 +64,33 @@ public class IncomingServiceImplementation implements IncomingService {
        return incomingResponseMapper.apply(newIncoming);
     }
 
-    private String getReferenceNumber(LocalDateTime transactionDate) {
-        return transactionDate.format(DateTimeFormatter.ofPattern("MMddyy"))
-                + "-"
-                + (incomingRepository.countByTransactionDate(transactionDate) + 1);
-    }
-
     @Override
-    public List<IncomingResponse> getIncomingTransactions(Integer storeId) {
-        List<Incoming> incoming;
-        incoming = incomingRepository.findByProductStoreId(storeId);
+    public List<IncomingResponse> getIncomingTransactions(
+            Integer storeId,
+            List<Integer> userIds,
+            Integer productId,
+            LocalDate startDate,
+            LocalDate endDate,
+            int pageNumber,
+            int pageSize,
+            Sort.Direction sortOrder
+    ) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new NotFoundException("Store not found."));
+
+        Pageable pageable = PageRequest.of(
+                pageNumber - 1,
+                pageSize,
+                Sort.by(sortOrder,"transactionDate")
+        );
+
+        List<Incoming> incoming = incomingRepository.getByStoreId(
+                store,
+                userIds.size() > 0 ? userIds : null,
+                productId,
+                startDate,
+                endDate, pageable
+        );
 
         return incoming.stream().map(incomingResponseMapper).collect(Collectors.toList());
     }
@@ -76,5 +101,11 @@ public class IncomingServiceImplementation implements IncomingService {
 
         return incoming.map(incomingResponseMapper)
                 .orElseThrow(() -> new NotFoundException("Transaction not found."));
+    }
+
+    private String getReferenceNumber(LocalDateTime transactionDate) {
+        return transactionDate.format(DateTimeFormatter.ofPattern("MMddyy"))
+                + "-"
+                + (incomingRepository.countByTransactionDate(transactionDate) + 1);
     }
 }

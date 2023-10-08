@@ -1,5 +1,7 @@
 package com.citu.listed.incoming;
 
+import com.citu.listed.store.Store;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -12,7 +14,23 @@ import java.util.Optional;
 @Repository
 public interface IncomingRepository extends JpaRepository<Incoming, Integer> {
 
-    List<Incoming> findByProductStoreId(Integer storeId);
+    @Query(
+            "SELECT incoming " +
+                    "FROM Incoming incoming " +
+                    "WHERE incoming.product.store = :store " +
+                    "AND (:startDate IS NULL OR DATE(incoming.transactionDate) >= :startDate) " +
+                    "AND (:endDate IS NULL OR DATE(incoming.transactionDate) <= :endDate) " +
+                    "AND (:productId IS NULL OR incoming.product.id = :productId) " +
+                    "AND (:#{#userIds == null} = true OR incoming.user.id IN :userIds)"
+    )
+    List<Incoming> getByStoreId(
+            Store store,
+            List<Integer> userIds,
+            Integer productId,
+            LocalDate startDate,
+            LocalDate endDate,
+            Pageable pageable
+    );
 
     @Query(
             "SELECT COUNT(incoming) " +
