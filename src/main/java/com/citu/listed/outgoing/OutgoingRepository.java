@@ -47,7 +47,8 @@ public interface OutgoingRepository extends JpaRepository<Outgoing, Integer> {
     @Query(
             "SELECT COALESCE(SUM(outgoing.revenue), 0) " +
                     "FROM Outgoing outgoing " +
-                    "WHERE DATE(outgoing.transactionDate) = :today " +
+                    "WHERE DATE(outgoing.transactionDate) >= :startDate " +
+                    "AND DATE(outgoing.transactionDate) <= :endDate " +
                     "AND outgoing.id IN " +
                     "(SELECT DISTINCT o.id " +
                             "FROM Outgoing o " +
@@ -55,17 +56,18 @@ public interface OutgoingRepository extends JpaRepository<Outgoing, Integer> {
                             "WHERE outProduct.product.store.id = :storeId " +
                             "AND o.category = :salesCategory)"
     )
-    Double getTotalRevenueByStoreId(LocalDate today, Integer storeId, OutgoingCategory salesCategory);
+    Double getTotalRevenueByStoreId(Integer storeId, OutgoingCategory salesCategory, LocalDate startDate, LocalDate endDate);
 
     @Query(
             "SELECT COALESCE(SUM(outProduct.quantity), 0) " +
                     "FROM Outgoing outgoing " +
                     "JOIN outgoing.products outProduct " +
-                    "WHERE DATE(outgoing.transactionDate) = :today " +
+                    "WHERE DATE(outgoing.transactionDate) >= :startDate " +
+                    "AND DATE(outgoing.transactionDate) <= :endDate " +
                     "AND outProduct.product.store.id = :storeId " +
                     "AND outgoing.category = :salesCategory"
     )
-    Double getTotalItemsSoldToday(LocalDate today, Integer storeId, OutgoingCategory salesCategory);
+    Double getTotalItemsSoldByStoreId(Integer storeId, OutgoingCategory salesCategory, LocalDate startDate, LocalDate endDate);
 
     @Query(
             "SELECT COALESCE(SUM(outProduct.quantity), 0) " +

@@ -20,8 +20,6 @@ import java.util.function.Function;
 public class StoreResponseMapper implements Function<Store, StoreResponse> {
 
     private final IncomingRepository incomingRepository;
-    private final ProductRepository productRepository;
-    private final OutgoingRepository outgoingRepository;
     private final UserResponseMapper userResponseMapper;
     private final UserRepository userRepository;
 
@@ -37,11 +35,7 @@ public class StoreResponseMapper implements Function<Store, StoreResponse> {
                 ),
                 store.getStatus(),
                 incomingRepository.getTotalProductsByStoreId(store.getId()),
-                incomingRepository.getTotalPriceValueByStoreId(store.getId()),
-                productRepository.countLowStockProductsByStoreId(store.getId()),
-                incomingRepository.getTotalNearExpiryItemsByStoreId(store.getId(), LocalDate.now().plusDays(14)),
-                outgoingRepository.getTotalRevenueByStoreId(LocalDate.now(), store.getId(), OutgoingCategory.SALES),
-                outgoingRepository.getTotalItemsSoldToday(LocalDate.now(), store.getId(), OutgoingCategory.SALES)
+                incomingRepository.getTotalPriceValueByStoreId(store.getId())
         );
     }
 }

@@ -9,10 +9,6 @@ public record StoreResponse(
         UserResponse owner,
         StoreStatus status,
         Double totalProducts,
-        Double totalPriceValue,
-        Long totalLowStock,
-        Double totalNearExpiry,
-        Double totalRevenue,
-        Double totalItemsSold
+        Double totalPriceValue
 ) {
 }
