@@ -43,7 +43,7 @@ public class OutgoingController {
             @RequestParam(defaultValue = "") List<OutgoingCategory> categories,
             @RequestParam(defaultValue = "1") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(defaultValue = "ASC") Sort.Direction sortOrder
+            @RequestParam(defaultValue = "DESC") Sort.Direction sortOrder
     ){
         return new ResponseEntity<>(
                 outgoingService.getOutgoingTransactions(

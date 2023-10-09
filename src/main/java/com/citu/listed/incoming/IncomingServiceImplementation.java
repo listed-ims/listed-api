@@ -89,7 +89,8 @@ public class IncomingServiceImplementation implements IncomingService {
                 userIds.size() > 0 ? userIds : null,
                 productId,
                 startDate,
-                endDate, pageable
+                endDate,
+                pageable
         );
 
         return incoming.stream().map(incomingResponseMapper).collect(Collectors.toList());
