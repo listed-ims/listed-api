@@ -82,10 +82,10 @@ public class OutgoingServiceImplementation implements OutgoingService {
 
                 Incoming incoming;
                 if(request.getCategory() == OutgoingCategory.EXPIRED) {
-                    incoming = incomingRepository.getEarliestExpiredByProductId(product.getId(), LocalDate.now())
+                    incoming = incomingRepository.findFirstByActualQuantityGreaterThanAndProductIdOrderByExpirationDateDesc(0.0, product.getId())
                             .orElseThrow(() -> new NotFoundException("No transaction found."));
                 } else{
-                    incoming = incomingRepository.getEarliestByProductId(product.getId(), LocalDate.now())
+                    incoming = incomingRepository.findFirstByActualQuantityGreaterThanAndProductIdOrderByExpirationDateAsc(0.0, product.getId())
                             .orElseThrow(() -> new NotFoundException("No transaction found."));
                 }
 
