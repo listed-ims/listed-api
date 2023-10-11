@@ -15,4 +15,6 @@ public interface StoreRepository extends JpaRepository<Store, Integer> {
     Optional<Store> findByIdAndMembersUser(Integer id, User user);
     List<Store> findAllByMembersUser(User user, Pageable pageable);
     List<Store> findAllByMembersUserAndStatus(User user, StoreStatus status, Pageable pageable);
+    Optional<Store> findFirstByMembersUserAndStatusAndIdNot(User user, StoreStatus status, Integer id);
+
 }
