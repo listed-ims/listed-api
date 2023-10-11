@@ -79,8 +79,15 @@ public class OutgoingServiceImplementation implements OutgoingService {
             totalPrice += price;
 
             while (quantity > 0.0){
-                Incoming incoming = incomingRepository.getEarliestByProductId(product.getId())
-                        .orElseThrow(() -> new NotFoundException("No transaction found."));
+
+                Incoming incoming;
+                if(request.getCategory() == OutgoingCategory.EXPIRED) {
+                    incoming = incomingRepository.getEarliestExpiredByProductId(product.getId(), LocalDate.now())
+                            .orElseThrow(() -> new NotFoundException("No transaction found."));
+                } else{
+                    incoming = incomingRepository.getEarliestByProductId(product.getId(), LocalDate.now())
+                            .orElseThrow(() -> new NotFoundException("No transaction found."));
+                }
 
                 Double actualQuantity = incoming.getActualQuantity();
 
