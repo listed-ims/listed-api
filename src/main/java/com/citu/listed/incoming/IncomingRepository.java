@@ -71,9 +71,19 @@ public interface IncomingRepository extends JpaRepository<Incoming, Integer> {
             "SELECT incoming FROM Incoming incoming " +
                     "WHERE incoming.actualQuantity > 0 " +
                     "AND incoming.product.id = :productId " +
+                    "AND (incoming.expirationDate IS NULL OR incoming.expirationDate > :date) " +
                     "ORDER BY incoming.transactionDate LIMIT 1"
     )
-    Optional<Incoming> getEarliestByProductId(Integer productId);
+    Optional<Incoming> getEarliestByProductId(Integer productId, LocalDate date);
+
+    @Query(
+            "SELECT incoming FROM Incoming incoming " +
+                    "WHERE incoming.actualQuantity > 0 " +
+                    "AND incoming.product.id = :productId " +
+                    "AND incoming.expirationDate <= :date " +
+                    "ORDER BY incoming.transactionDate LIMIT 1"
+    )
+    Optional<Incoming> getEarliestExpiredByProductId(Integer productId, LocalDate date);
 
     @Query(
             "SELECT COALESCE(SUM(incoming.actualQuantity), 0) " +
