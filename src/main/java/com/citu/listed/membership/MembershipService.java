@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 public interface MembershipService {
-    MembershipResponse addCollaborator(MembershipRequest membership);
+    MembershipResponse addCollaborator(String token, MembershipRequest membership);
     List<MembershipResponse> getCollaborators(
             Integer storeId,
             MembershipStatus membershipStatus,

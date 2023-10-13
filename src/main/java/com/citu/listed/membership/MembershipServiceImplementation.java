@@ -4,6 +4,8 @@ import com.citu.listed.membership.dtos.MembershipRequest;
 import com.citu.listed.membership.dtos.MembershipResponse;
 import com.citu.listed.membership.enums.MembershipStatus;
 import com.citu.listed.membership.mappers.MembershipResponseMapper;
+import com.citu.listed.notification.NotificationService;
+import com.citu.listed.notification.enums.NotificationType;
 import com.citu.listed.permission.Permission;
 import com.citu.listed.permission.PermissionRepository;
 import com.citu.listed.permission.enums.UserPermissions;
@@ -13,6 +15,7 @@ import com.citu.listed.store.Store;
 import com.citu.listed.store.StoreRepository;
 import com.citu.listed.user.User;
 import com.citu.listed.user.UserRepository;
+import com.citu.listed.user.config.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,10 +35,16 @@ public class MembershipServiceImplementation implements MembershipService {
     private final MembershipRepository membershipRepository;
     private final PermissionRepository permissionRepository;
     private final MembershipResponseMapper membershipResponseMapper;
+    private final NotificationService notificationService;
+    private final JwtService jwtService;
 
     @Override
     @Transactional
-    public MembershipResponse addCollaborator(MembershipRequest membership) {
+    public MembershipResponse addCollaborator(String token, MembershipRequest membership) {
+
+        User sender = userRepository.findByUsername(jwtService.extractUsername(token))
+                .orElseThrow(() -> new NotFoundException("Sender not found."));
+
         User user = userRepository.findByUsername(membership.getUsername())
                 .orElseThrow(() -> new NotFoundException("User not found."));
 
@@ -54,6 +63,7 @@ public class MembershipServiceImplementation implements MembershipService {
         Membership newMembership = membershipRepository.save(
                 Membership.builder()
                         .user(user)
+                        .sender(sender)
                         .store(store)
                         .permissions(permissions)
                         .membershipStatus(MembershipStatus.PENDING)
@@ -64,6 +74,13 @@ public class MembershipServiceImplementation implements MembershipService {
             userRepository.save(user);
         }
 
+        notificationService.addNewNotification(
+                newMembership,
+                null,
+                sender,
+                NotificationType.STORE_INVITE);
+
+        System.out.println("NEW MEMBERSHIP = " + newMembership);
         return membershipResponseMapper.apply(newMembership);
     }
 
@@ -145,7 +162,18 @@ public class MembershipServiceImplementation implements MembershipService {
                 membership.setMembershipStatus(membershipStatus);
             }
             membership.setMembershipStatus(membershipStatus);
+
+            if (membershipStatus == MembershipStatus.INACTIVE) {
+                notificationService.addNewNotification(membership, null, membership.getSender(), NotificationType.COLLABORATOR_REMOVAL);
+            } else if (membershipStatus == MembershipStatus.PENDING) {
+                notificationService.addNewNotification(membership, null, membership.getSender(), NotificationType.STORE_INVITE);
+            } else {
+                notificationService.addNewNotification(membership, null, membership.getSender(), NotificationType.INVITE_REPLY);
+
+            }
+
         }
+
 
         return membershipResponseMapper.apply(membershipRepository.save(membership));
     }
