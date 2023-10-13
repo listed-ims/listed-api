@@ -55,7 +55,7 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
             "SELECT  COALESCE(COUNT(product), 0) " +
                     "FROM Product product " +
                     "WHERE product.store.id = :storeId " +
-                    "AND product.threshold >= " +
+                    "AND COALESCE(product.threshold, 0) >= " +
                     "(SELECT COALESCE(SUM(incoming.actualQuantity), 0) FROM Incoming incoming " +
                     "WHERE incoming.product.id = product.id)"
     )
