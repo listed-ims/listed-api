@@ -36,20 +36,15 @@ public class Notification {
 
 
     @Builder
-    public Notification(Integer id, User sender, String metaData,
+    public Notification(User sender, String metaData,
                         NotificationType notificationType, LocalDateTime dateCreated){
 
-        this.id = id;
         this.sender = sender;
         this.metaData = metaData;
-        this.dateCreated = dateCreated;
         this.notificationType = notificationType;
+        this.dateCreated = dateCreated;
 
 
     }
-
-
-
-
 }
 

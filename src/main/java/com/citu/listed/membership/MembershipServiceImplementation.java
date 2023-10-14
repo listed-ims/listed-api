@@ -80,7 +80,6 @@ public class MembershipServiceImplementation implements MembershipService {
                 sender,
                 NotificationType.STORE_INVITE);
 
-        System.out.println("NEW MEMBERSHIP = " + newMembership);
         return membershipResponseMapper.apply(newMembership);
     }
 
