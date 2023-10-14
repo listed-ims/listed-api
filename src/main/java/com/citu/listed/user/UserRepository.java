@@ -1,5 +1,6 @@
 package com.citu.listed.user;
 
+import com.citu.listed.membership.enums.MembershipStatus;
 import com.citu.listed.permission.enums.UserPermissions;
 import com.citu.listed.store.Store;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,6 +14,8 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     Optional<User> findByUsername(String username);
     User findByMemberships_StoreAndMemberships_Permissions_UserPermission(Store store, UserPermissions userPermission);
+    List<User> findByMemberships_StoreAndMemberships_Permissions_UserPermissionAndMemberships_MembershipStatus(Store store, UserPermissions userPermission, MembershipStatus membershipStatus);
     List<User> findByCurrentStoreId(Integer storeId);
+
 
 }

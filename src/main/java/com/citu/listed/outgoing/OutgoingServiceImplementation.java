@@ -2,6 +2,8 @@ package com.citu.listed.outgoing;
 
 import com.citu.listed.incoming.Incoming;
 import com.citu.listed.incoming.IncomingRepository;
+import com.citu.listed.notification.NotificationService;
+import com.citu.listed.notification.enums.NotificationType;
 import com.citu.listed.outgoing.dtos.OutProductRequest;
 import com.citu.listed.outgoing.dtos.OutgoingRequest;
 import com.citu.listed.outgoing.dtos.OutgoingResponse;
@@ -43,11 +45,12 @@ public class OutgoingServiceImplementation implements OutgoingService {
     private final StoreRepository storeRepository;
     private final JwtService jwtService;
     private final OutgoingResponseMapper outgoingResponseMapper;
-
+    private  final NotificationService notificationService;
 
     @Override
     @Transactional
     public OutgoingResponse outProducts(String token, OutgoingRequest request) {
+
 
         User user = userRepository.findByUsername(jwtService.extractUsername(token))
                 .orElseThrow(() -> new NotFoundException("User not found."));
@@ -119,6 +122,18 @@ public class OutgoingServiceImplementation implements OutgoingService {
                 .build();
 
         outgoingRepository.save(newOutgoing);
+
+        for (OutProduct outProduct:outProducts) {
+            Double quantity = incomingRepository.getTotalQuantityByProductId(outProduct.getProduct().getId());
+
+            if (quantity <= outProduct.getProduct().getThreshold()){
+                notificationService.addNewNotification(
+                        null,
+                        outProduct.getProduct(),
+                        null,
+                        NotificationType.LOW_STOCK);
+            }
+        }
 
         return outgoingResponseMapper.apply(newOutgoing);
     }

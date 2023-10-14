@@ -13,6 +13,7 @@ import lombok.Setter;
 import org.hibernate.annotations.Where;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -23,7 +24,7 @@ import java.util.Set;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Membership {
+public class Membership implements Serializable {
 
     @Id
     @GeneratedValue
@@ -39,6 +40,10 @@ public class Membership {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @ManyToOne
+    @JoinColumn(name = "sender_id")
+    private User sender;
+
     @Column
     @NotNull(message = "Membership status is required.")
     @Enumerated(EnumType.STRING)
@@ -53,11 +58,12 @@ public class Membership {
     private Set<Permission> permissions = new HashSet<>();
 
     @Builder
-    public Membership(Store store, User user,
+    public Membership(Store store, User user, User sender,
                       MembershipStatus membershipStatus,
                       Set<Permission> permissions){
         this.store = store;
         this.user = user;
+        this.sender = sender;
         this.membershipStatus = membershipStatus;
         this.permissions = permissions;
     }

@@ -7,6 +7,7 @@ import com.citu.listed.permission.enums.UserPermissions;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,9 +26,12 @@ public class MembershipController {
 
     @PostMapping("")
     public ResponseEntity<MembershipResponse> addCollaborator(
+            @RequestHeader HttpHeaders headers,
             @RequestBody @Valid MembershipRequest membership
-    ){
-        return new ResponseEntity<>(membershipService.addCollaborator(membership), HttpStatus.CREATED);
+    )
+    {
+        String token = headers.getFirst(HttpHeaders.AUTHORIZATION).substring(7);
+        return new ResponseEntity<>(membershipService.addCollaborator(token,membership), HttpStatus.CREATED);
     }
 
     @GetMapping("")
