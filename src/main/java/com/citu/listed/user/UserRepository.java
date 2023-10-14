@@ -11,10 +11,11 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
+
     Optional<User> findByUsername(String username);
     User findByMemberships_StoreAndMemberships_Permissions_UserPermission(Store store, UserPermissions userPermission);
-
     List<User> findByMemberships_StoreAndMemberships_Permissions_UserPermissionAndMemberships_MembershipStatus(Store store, UserPermissions userPermission, MembershipStatus membershipStatus);
+    List<User> findByCurrentStoreId(Integer storeId);
 
 
 }

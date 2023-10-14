@@ -16,6 +16,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -45,7 +46,12 @@ public class StoreServiceImplementation implements StoreService {
                 .orElseThrow(() -> new NotFoundException("User not found."));
 
         List<Store> stores;
-        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
+        Pageable pageable = PageRequest.of(
+                pageNumber - 1,
+                pageSize,
+                Sort.by(Sort.Direction.DESC,"status")
+                        .and(Sort.by("name"))
+        );
 
         if(status == null)
             stores = storeRepository.findAllByMembersUser(user, pageable);
@@ -95,12 +101,24 @@ public class StoreServiceImplementation implements StoreService {
     }
 
     @Override
+    @Transactional
     public StoreResponse updateStore(Integer id, Store store) {
         Store storeToUpdate = storeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Store to update not found."));
 
         storeToUpdate.setName(store.getName());
         storeToUpdate.setStatus(store.getStatus());
+
+        if(store.getStatus() == StoreStatus.CLOSED) {
+            List<User> users = userRepository.findByCurrentStoreId(id);
+            if(!users.isEmpty()) {
+                for(User user: users) {
+                    Store nextCurrentStore = storeRepository.findFirstByMembersUserAndStatusAndIdNot(user, StoreStatus.OPEN, id).orElse(null);
+                    user.setCurrentStoreId(nextCurrentStore != null ? nextCurrentStore.getId() : null);
+                    userRepository.save(user);
+                }
+            }
+        }
 
         return storeResponseMapper.apply(storeRepository.save(storeToUpdate));
     }
