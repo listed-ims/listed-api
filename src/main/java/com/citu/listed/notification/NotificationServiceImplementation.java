@@ -4,12 +4,15 @@ import com.citu.listed.incoming.Incoming;
 import com.citu.listed.incoming.IncomingRepository;
 import com.citu.listed.membership.Membership;
 import com.citu.listed.membership.enums.MembershipStatus;
+import com.citu.listed.notification.dtos.NotificationResponse;
 import com.citu.listed.notification.enums.NotificationStatus;
 import com.citu.listed.notification.enums.NotificationType;
+import com.citu.listed.notification.mappers.NotificationResponseMapper;
 import com.citu.listed.permission.enums.UserPermissions;
 import com.citu.listed.product.Product;
 import com.citu.listed.user.User;
 import com.citu.listed.user.UserRepository;
+import com.citu.listed.user.config.JwtService;
 import com.citu.listed.user.mappers.UserResponseMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,6 +20,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +38,9 @@ public class NotificationServiceImplementation implements NotificationService {
     private final IncomingRepository incomingRepository;
     private final NotificationBroadcastRepository notificationBroadcastRepository;
     private final UserResponseMapper userResponseMapper;
+    private final NotificationResponseMapper notificationResponseMapper;
+    private final JwtService jwtService;
+
 
     @Transactional
     @Override
@@ -68,6 +79,7 @@ public class NotificationServiceImplementation implements NotificationService {
                     .sender(user)
                     .metaData(objectNode.toString())
                     .notificationType(notificationType)
+                    .dateCreated(LocalDateTime.now())
                     .build());
 
             List<User> recipients;
@@ -93,6 +105,31 @@ public class NotificationServiceImplementation implements NotificationService {
             System.out.println(e);
         }
     }
+
+
+    @Override
+    public List<NotificationResponse> getNotifications(String token, NotificationStatus status, int pageNumber, int pageSize) {
+
+        User receiver = userRepository.findByUsername(jwtService.extractUsername(token))
+                .orElseThrow(() -> new RuntimeException("Receiver not found"));
+
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
+
+        List<NotificationBroadcast> notifications;
+
+        if (status == null) {
+            notifications = notificationBroadcastRepository.findByReceiverOrderByNotificationDateCreatedDesc(receiver, pageable);
+
+        } else {
+            notifications = notificationBroadcastRepository.findByReceiverAndNotificationStatusOrderByNotificationDateCreatedDesc(receiver, status, pageable);
+        }
+
+        return notifications.stream()
+                .map(notificationResponseMapper)
+                .collect(Collectors.toList());
+
+    }
+
     private List<User> getRecipientsForMembership(Membership membership, User user, NotificationType type) {
         List<User> recipients = new ArrayList<>();
 
