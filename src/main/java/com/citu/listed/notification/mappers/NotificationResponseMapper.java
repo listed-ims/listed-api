@@ -1,6 +1,5 @@
 package com.citu.listed.notification.mappers;
 
-import com.citu.listed.notification.Notification;
 import com.citu.listed.notification.NotificationBroadcast;
 import com.citu.listed.notification.dtos.NotificationResponse;
 import com.citu.listed.user.mappers.UserResponseMapper;
@@ -21,7 +20,7 @@ public class NotificationResponseMapper implements Function<NotificationBroadcas
         return new NotificationResponse(
                 notificationBroadcast.getId(),
                 userResponseMapper.apply(notificationBroadcast.getReceiver()),
-                userResponseMapper.apply(notificationBroadcast.getNotification().getSender()),
+                notificationBroadcast.getNotification().getSender()==null?null:userResponseMapper.apply(notificationBroadcast.getNotification().getSender()),
                 notificationBroadcast.getNotification().getMetaData(),
                 notificationBroadcast.getNotificationStatus(),
                 notificationBroadcast.getNotification().getNotificationType(),
