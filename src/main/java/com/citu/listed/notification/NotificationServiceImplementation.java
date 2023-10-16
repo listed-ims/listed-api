@@ -130,6 +130,20 @@ public class NotificationServiceImplementation implements NotificationService {
 
     }
 
+
+    @Override
+    public NotificationResponse updateNotification(Integer notificationBroadcastId) {
+        NotificationBroadcast notificationBroadcast = notificationBroadcastRepository.findById(notificationBroadcastId)
+                .orElseThrow(() -> new RuntimeException("Notification not found"));
+
+        notificationBroadcast.setNotificationStatus(NotificationStatus.READ);
+        notificationBroadcastRepository.save(notificationBroadcast);
+
+        return notificationResponseMapper.apply(notificationBroadcast);
+    }
+
+
+
     private List<User> getRecipientsForMembership(Membership membership, User user, NotificationType type) {
         List<User> recipients = new ArrayList<>();
 
