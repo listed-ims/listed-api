@@ -1,5 +1,6 @@
 package com.citu.listed.notification;
 
+import com.citu.listed.notification.dtos.NotificationResponse;
 import com.citu.listed.notification.enums.NotificationStatus;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,11 @@ public class NotificationController {
                 notificationService.getNotifications(token, status, pageNumber, pageSize),
                 HttpStatus.OK);
     }
+    @PutMapping("/{id}")
+    public ResponseEntity<NotificationResponse> updateNotificationStatus(@PathVariable Integer id) {
 
+        NotificationResponse updatedNotification = notificationService.updateNotification(id);
+        return new ResponseEntity<>(updatedNotification, HttpStatus.OK);
+    }
 
 }

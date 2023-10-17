@@ -10,6 +10,7 @@ import com.citu.listed.notification.enums.NotificationType;
 import com.citu.listed.notification.mappers.NotificationResponseMapper;
 import com.citu.listed.permission.enums.UserPermissions;
 import com.citu.listed.product.Product;
+import com.citu.listed.shared.exception.NotFoundException;
 import com.citu.listed.user.User;
 import com.citu.listed.user.UserRepository;
 import com.citu.listed.user.config.JwtService;
@@ -111,7 +112,7 @@ public class NotificationServiceImplementation implements NotificationService {
     public List<NotificationResponse> getNotifications(String token, NotificationStatus status, int pageNumber, int pageSize) {
 
         User receiver = userRepository.findByUsername(jwtService.extractUsername(token))
-                .orElseThrow(() -> new RuntimeException("Receiver not found"));
+                .orElseThrow(() -> new NotFoundException("Receiver not found"));
 
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
 
@@ -129,6 +130,20 @@ public class NotificationServiceImplementation implements NotificationService {
                 .collect(Collectors.toList());
 
     }
+
+
+    @Override
+    public NotificationResponse updateNotification(Integer notificationBroadcastId) {
+        NotificationBroadcast notificationBroadcast = notificationBroadcastRepository.findById(notificationBroadcastId)
+                .orElseThrow(() -> new NotFoundException("Notification not found."));
+
+        notificationBroadcast.setNotificationStatus(NotificationStatus.READ);
+        notificationBroadcastRepository.save(notificationBroadcast);
+
+        return notificationResponseMapper.apply(notificationBroadcast);
+    }
+
+
 
     private List<User> getRecipientsForMembership(Membership membership, User user, NotificationType type) {
         List<User> recipients = new ArrayList<>();

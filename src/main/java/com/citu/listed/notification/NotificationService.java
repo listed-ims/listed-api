@@ -12,6 +12,7 @@ import java.util.List;
 public interface NotificationService {
 
         void addNewNotification(Membership membership, Product product, User user, NotificationType notificationType);
-
         List<NotificationResponse> getNotifications(String token, NotificationStatus status, int pageNumber, int pageSize);
+        NotificationResponse updateNotification(Integer notificationBroadcastId);
+
 }
