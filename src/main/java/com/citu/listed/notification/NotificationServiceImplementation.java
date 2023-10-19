@@ -45,7 +45,13 @@ public class NotificationServiceImplementation implements NotificationService {
 
     @Transactional
     @Override
-    public void addNewNotification(Membership membership, Product product, User user, NotificationType notificationType) {
+    public void addNewNotification(
+            Membership membership,
+            Product product,
+            Incoming incoming,
+            User user,
+            NotificationType notificationType
+    ) {
 
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode objectNode = mapper.createObjectNode();
@@ -55,22 +61,16 @@ public class NotificationServiceImplementation implements NotificationService {
                 objectNode.put("product", mapper.writeValueAsString(product));
                 objectNode.put("quantity", incomingRepository.getTotalQuantityByProductId(product.getId()) );
                 objectNode.put("store", mapper.writeValueAsString(product.getStore()));
-
             } else if (notificationType == NotificationType.EXPIRATION) {
-                Incoming incoming = incomingRepository.findFirstByActualQuantityGreaterThanAndProductIdOrderByExpirationDateDesc(0.0, product.getId()).orElseThrow();
-                objectNode.put("product", mapper.writeValueAsString(product));
-                objectNode.put("quantity", product.getThreshold());
+                objectNode.put("product", mapper.writeValueAsString(incoming.getProduct()));
+                objectNode.put("quantity", incoming.getActualQuantity());
                 objectNode.put("expirationDate", mapper.writeValueAsString(incoming.getExpirationDate()));
-                objectNode.put("store", mapper.writeValueAsString(product.getStore()));
-
+                objectNode.put("store", mapper.writeValueAsString(incoming.getProduct().getStore()));
             } else if (notificationType == NotificationType.COLLABORATOR_REMOVAL) {
-                objectNode.put("sender", mapper.writeValueAsString(userResponseMapper.apply(user)));
                 objectNode.put("recipient", mapper.writeValueAsString(userResponseMapper.apply(membership.getUser())));
                 objectNode.put("store", mapper.writeValueAsString(membership.getStore()));
-
-                
             } else {
-                objectNode.put("sender", mapper.writeValueAsString(userResponseMapper.apply(user)));
+                objectNode.put("membershipId", membership.getId());
                 objectNode.put("invitee", mapper.writeValueAsString(userResponseMapper.apply(membership.getUser())));
                 objectNode.put("store", mapper.writeValueAsString(membership.getStore()));
                 objectNode.put("status", mapper.writeValueAsString(membership.getMembershipStatus()));
@@ -85,22 +85,21 @@ public class NotificationServiceImplementation implements NotificationService {
 
             List<User> recipients;
 
-            if (notificationType == NotificationType.LOW_STOCK || notificationType == NotificationType.EXPIRATION) {
+            if (notificationType == NotificationType.LOW_STOCK)
                 recipients = getRecipientsForProduct(product);
-
-            } else {
+            else if (notificationType == NotificationType.EXPIRATION)
+                recipients = getRecipientsForProduct(incoming.getProduct());
+            else
                 recipients = getRecipientsForMembership(membership, user, notificationType);
 
-            }
-
             for (User recipient: recipients) {
-            NotificationBroadcast broadcast = NotificationBroadcast.builder()
-                    .notification(notification)
-                    .receiver(recipient).notificationStatus(NotificationStatus.UNREAD)
-                    .build();
+                NotificationBroadcast broadcast = NotificationBroadcast.builder()
+                        .notification(notification)
+                        .receiver(recipient).notificationStatus(NotificationStatus.UNREAD)
+                        .build();
 
-            notificationBroadcastRepository.save(broadcast);
-        }
+                notificationBroadcastRepository.save(broadcast);
+            }
 
         } catch (JsonProcessingException e) {
             System.out.println(e);
@@ -118,17 +117,14 @@ public class NotificationServiceImplementation implements NotificationService {
 
         List<NotificationBroadcast> notifications;
 
-        if (status == null) {
+        if (status == null)
             notifications = notificationBroadcastRepository.findByReceiverOrderByNotificationDateCreatedDesc(receiver, pageable);
-
-        } else {
+        else
             notifications = notificationBroadcastRepository.findByReceiverAndNotificationStatusOrderByNotificationDateCreatedDesc(receiver, status, pageable);
-        }
 
         return notifications.stream()
                 .map(notificationResponseMapper)
                 .collect(Collectors.toList());
-
     }
 
 
@@ -148,24 +144,31 @@ public class NotificationServiceImplementation implements NotificationService {
     private List<User> getRecipientsForMembership(Membership membership, User user, NotificationType type) {
         List<User> recipients = new ArrayList<>();
 
-        if (type == NotificationType.INVITE_REPLY){
+        if (type == NotificationType.INVITE_REPLY)
             recipients.add(membership.getSender());
-
-        } else {
+        else
             recipients.add(membership.getUser());
-        }
 
-        User owner = userRepository.findByMemberships_StoreAndMemberships_Permissions_UserPermission(membership.getStore(), UserPermissions.OWNER);
+        User owner = userRepository.findByMemberships_StoreAndMemberships_Permissions_UserPermission(
+                membership.getStore(),
+                UserPermissions.OWNER
+        );
 
-        if(!owner.getId().equals(user.getId())){
+        if(!owner.getId().equals(user.getId()))
             recipients.add(owner);
-        }
 
         return recipients;
     }
     private List<User> getRecipientsForProduct(Product product) {
-        List<User> recipients = userRepository.findByMemberships_StoreAndMemberships_Permissions_UserPermissionAndMemberships_MembershipStatus(product.getStore(), UserPermissions.VIEW_PRODUCT_DETAILS, MembershipStatus.ACTIVE);
-        recipients.add(userRepository.findByMemberships_StoreAndMemberships_Permissions_UserPermission(product.getStore(), UserPermissions.OWNER));
+        List<User> recipients = userRepository .findByMemberships_StoreAndMemberships_Permissions_UserPermissionAndMemberships_MembershipStatus(
+                product.getStore(),
+                UserPermissions.VIEW_PRODUCT_DETAILS,
+                MembershipStatus.ACTIVE
+        );
+        recipients.add(userRepository.findByMemberships_StoreAndMemberships_Permissions_UserPermission(
+                product.getStore(),
+                UserPermissions.OWNER)
+        );
 
         return recipients;
     }

@@ -131,6 +131,7 @@ public class OutgoingServiceImplementation implements OutgoingService {
                         null,
                         outProduct.getProduct(),
                         null,
+                        null,
                         NotificationType.LOW_STOCK);
             }
         }

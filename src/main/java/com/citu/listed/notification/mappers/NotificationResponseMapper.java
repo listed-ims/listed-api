@@ -19,7 +19,6 @@ public class NotificationResponseMapper implements Function<NotificationBroadcas
 
         return new NotificationResponse(
                 notificationBroadcast.getId(),
-                userResponseMapper.apply(notificationBroadcast.getReceiver()),
                 notificationBroadcast.getNotification().getSender()==null?null:userResponseMapper.apply(notificationBroadcast.getNotification().getSender()),
                 notificationBroadcast.getNotification().getMetaData(),
                 notificationBroadcast.getNotificationStatus(),

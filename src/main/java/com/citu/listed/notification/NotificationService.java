@@ -1,5 +1,6 @@
 package com.citu.listed.notification;
 
+import com.citu.listed.incoming.Incoming;
 import com.citu.listed.membership.Membership;
 import com.citu.listed.notification.dtos.NotificationResponse;
 import com.citu.listed.notification.enums.NotificationStatus;
@@ -11,7 +12,7 @@ import java.util.List;
 
 public interface NotificationService {
 
-        void addNewNotification(Membership membership, Product product, User user, NotificationType notificationType);
+        void addNewNotification(Membership membership, Product product, Incoming incoming, User user, NotificationType notificationType);
         List<NotificationResponse> getNotifications(String token, NotificationStatus status, int pageNumber, int pageSize);
         NotificationResponse updateNotification(Integer notificationBroadcastId);
 
