@@ -77,6 +77,7 @@ public class MembershipServiceImplementation implements MembershipService {
         notificationService.addNewNotification(
                 newMembership,
                 null,
+                null,
                 sender,
                 NotificationType.STORE_INVITE);
 
@@ -163,16 +164,27 @@ public class MembershipServiceImplementation implements MembershipService {
             membership.setMembershipStatus(membershipStatus);
 
             if (membershipStatus == MembershipStatus.INACTIVE) {
-                notificationService.addNewNotification(membership, null, membership.getSender(), NotificationType.COLLABORATOR_REMOVAL);
+                notificationService.addNewNotification(
+                        membership,
+                        null,
+                        null,
+                        membership.getSender(), NotificationType.COLLABORATOR_REMOVAL);
             } else if (membershipStatus == MembershipStatus.PENDING) {
-                notificationService.addNewNotification(membership, null, membership.getSender(), NotificationType.STORE_INVITE);
+                notificationService.addNewNotification(
+                        membership,
+                        null,
+                        null,
+                        membership.getSender(),
+                        NotificationType.STORE_INVITE);
             } else {
-                notificationService.addNewNotification(membership, null, membership.getSender(), NotificationType.INVITE_REPLY);
-
+                notificationService.addNewNotification(
+                        membership,
+                        null,
+                        null,
+                        membership.getSender(),
+                        NotificationType.INVITE_REPLY);
             }
-
         }
-
 
         return membershipResponseMapper.apply(membershipRepository.save(membership));
     }

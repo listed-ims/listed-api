@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 public record NotificationResponse(
 
         Integer id,
-        UserResponse receiver,
         UserResponse sender,
         String metaData,
         NotificationStatus status,

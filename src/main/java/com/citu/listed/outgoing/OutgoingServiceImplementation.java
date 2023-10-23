@@ -126,10 +126,11 @@ public class OutgoingServiceImplementation implements OutgoingService {
         for (OutProduct outProduct:outProducts) {
             Double quantity = incomingRepository.getTotalQuantityByProductId(outProduct.getProduct().getId());
 
-            if (quantity <= outProduct.getProduct().getThreshold()){
+            if (outProduct.getProduct().getThreshold() != null && quantity <= outProduct.getProduct().getThreshold()){
                 notificationService.addNewNotification(
                         null,
                         outProduct.getProduct(),
+                        null,
                         null,
                         NotificationType.LOW_STOCK);
             }
