@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.servers.Server;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @OpenAPIDefinition(
 		info = @Info(
@@ -33,6 +34,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 		in = SecuritySchemeIn.HEADER
 )
 @SpringBootApplication
+@EnableScheduling
 public class ListedApplication {
 
 	public static void main(String[] args) {

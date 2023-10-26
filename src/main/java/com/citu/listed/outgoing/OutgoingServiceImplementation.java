@@ -84,8 +84,8 @@ public class OutgoingServiceImplementation implements OutgoingService {
             while (quantity > 0.0){
 
                 Incoming incoming;
-                if(request.getCategory() == OutgoingCategory.EXPIRED) {
-                    incoming = incomingRepository.findFirstByActualQuantityGreaterThanAndProductIdOrderByExpirationDateDesc(0.0, product.getId())
+                if(request.getCategory() != OutgoingCategory.EXPIRED) {
+                    incoming = incomingRepository.findFirstByActualQuantityGreaterThanAndProductId(0.0, product.getId())
                             .orElseThrow(() -> new NotFoundException("No transaction found."));
                 } else{
                     incoming = incomingRepository.findFirstByActualQuantityGreaterThanAndProductIdOrderByExpirationDateAsc(0.0, product.getId())
