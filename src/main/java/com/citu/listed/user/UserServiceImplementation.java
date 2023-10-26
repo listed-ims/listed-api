@@ -1,7 +1,8 @@
 package com.citu.listed.user;
 
-import com.citu.listed.shared.exception.NotFoundException;
+import com.citu.listed.membership.enums.MembershipStatus;
 import com.citu.listed.shared.exception.BadRequestException;
+import com.citu.listed.shared.exception.NotFoundException;
 import com.citu.listed.store.Store;
 import com.citu.listed.store.StoreRepository;
 import com.citu.listed.user.config.JwtService;
@@ -17,11 +18,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImplementation implements UserService{
+public class UserServiceImplementation implements UserService {
 
     private final UserDetailsService userDetailsService;
     private final UserRepository userRepository;
@@ -31,7 +33,7 @@ public class UserServiceImplementation implements UserService{
     private final AuthenticationManager authenticationManager;
     private final UserResponseMapper userResponseMapper;
 
-    public AuthenticationResponse register(UserRequest request){
+    public AuthenticationResponse register(UserRequest request) {
         var user = User.builder()
                 .name(request.getName())
                 .username(request.getUsername())
@@ -48,7 +50,7 @@ public class UserServiceImplementation implements UserService{
         }
     }
 
-    public AuthenticationResponse authenticate(AuthenticationRequest request){
+    public AuthenticationResponse authenticate(AuthenticationRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getUsername(),
@@ -63,7 +65,7 @@ public class UserServiceImplementation implements UserService{
                 .build();
     }
 
-    public boolean validateUsername(String username){
+    public boolean validateUsername(String username) {
         return userRepository.findByUsername(username).isEmpty();
     }
 
@@ -86,7 +88,7 @@ public class UserServiceImplementation implements UserService{
         User userToUpdate = userRepository.findByUsername(currentUsername)
                 .orElseThrow(() -> new NotFoundException("User not found."));
 
-        if(request.getCurrentStoreId() == null) {
+        if (request.getCurrentStoreId() == null) {
             if (!request.getUsername().equals(currentUsername)) {
                 if (userRepository.findByUsername(request.getUsername()).isPresent())
                     throw new BadRequestException("Username is already taken.");
@@ -97,7 +99,11 @@ public class UserServiceImplementation implements UserService{
             userToUpdate.setName(request.getName());
             userToUpdate.setPassword(passwordEncoder.encode(request.getPassword()));
         } else {
-            Store store = storeRepository.findByIdAndMembersUser(request.getCurrentStoreId(), userToUpdate)
+            Store store = storeRepository.findByIdAndMembersUserAndMembersMembershipStatusNot(
+                            request.getCurrentStoreId(),
+                            userToUpdate,
+                            MembershipStatus.INACTIVE
+                    )
                     .orElseThrow(() -> new NotFoundException("Store not found."));
 
             userToUpdate.setCurrentStoreId(store.getId());
@@ -106,12 +112,12 @@ public class UserServiceImplementation implements UserService{
         return userResponseMapper.apply(userRepository.save(userToUpdate));
     }
 
-    public boolean validatePassword(String password,String token) {
+    public boolean validatePassword(String password, String token) {
         String username = jwtService.extractUsername(token);
         User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
 
-            return passwordEncoder.matches(password, user.getPassword());
-        }
+        return passwordEncoder.matches(password, user.getPassword());
+    }
 
     @Override
     public boolean validateToken(String token) {

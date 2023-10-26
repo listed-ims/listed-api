@@ -13,6 +13,7 @@ import com.citu.listed.shared.exception.BadRequestException;
 import com.citu.listed.shared.exception.NotFoundException;
 import com.citu.listed.store.Store;
 import com.citu.listed.store.StoreRepository;
+import com.citu.listed.store.enums.StoreStatus;
 import com.citu.listed.user.User;
 import com.citu.listed.user.UserRepository;
 import com.citu.listed.user.config.JwtService;
@@ -49,9 +50,9 @@ public class MembershipServiceImplementation implements MembershipService {
                 .orElseThrow(() -> new NotFoundException("User not found."));
 
         Store store = storeRepository.findById(membership.getStoreId())
-                .orElseThrow(()-> new NotFoundException(("Store not found.")));
+                .orElseThrow(() -> new NotFoundException(("Store not found.")));
 
-        if (membershipRepository.existsByStoreAndUser(store, user)){
+        if (membershipRepository.existsByStoreAndUser(store, user)) {
             throw new BadRequestException("User is already a collaborator.");
         }
 
@@ -69,7 +70,7 @@ public class MembershipServiceImplementation implements MembershipService {
                         .membershipStatus(MembershipStatus.PENDING)
                         .build());
 
-        if(user.getCurrentStoreId() == null){
+        if (user.getCurrentStoreId() == null) {
             user.setCurrentStoreId(membership.getStoreId());
             userRepository.save(user);
         }
@@ -91,7 +92,7 @@ public class MembershipServiceImplementation implements MembershipService {
             Integer userId,
             int pageNumber,
             int pageSize
-    ){
+    ) {
 
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new NotFoundException("Store not found."));
@@ -108,16 +109,16 @@ public class MembershipServiceImplementation implements MembershipService {
         if (user == null) {
             if (membershipStatus == null) {
                 memberships = membershipRepository.findByStore(store, pageable);
-            }else{
+            } else {
                 memberships = membershipRepository.
-                        findByStoreAndMembershipStatus( store, membershipStatus, pageable );
+                        findByStoreAndMembershipStatus(store, membershipStatus, pageable);
             }
-        }else{
+        } else {
             if (membershipStatus == null) {
                 memberships = Collections.singletonList(
                         membershipRepository.findByStoreAndUser(store, user)
                 );
-            }else{
+            } else {
                 memberships = Collections.singletonList(
                         membershipRepository.findByStoreAndMembershipStatusAndUser(store, membershipStatus, user));
             }
@@ -128,7 +129,7 @@ public class MembershipServiceImplementation implements MembershipService {
     }
 
     @Override
-    public MembershipResponse getCollaborator(Integer membershipId){
+    public MembershipResponse getCollaborator(Integer membershipId) {
         Membership membership = membershipRepository.findById(membershipId)
                 .orElseThrow(() -> new NotFoundException("Membership not found."));
 
@@ -141,51 +142,71 @@ public class MembershipServiceImplementation implements MembershipService {
             Integer id,
             Set<UserPermissions> userPermissions,
             MembershipStatus membershipStatus
-    ){
+    ) {
         Membership membership = membershipRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Membership does not exist."));
-
         if (userPermissions != null && !userPermissions.isEmpty()) {
-            Set<Permission> permissions =  userPermissions.stream()
+            if (userPermissions.contains(UserPermissions.OWNER)) {
+                throw new BadRequestException("Cannot set owner permission.");
+            }
+            Set<Permission> permissions = userPermissions.stream()
                     .map(permissionRepository::findByUserPermission)
-                            .collect(Collectors.toSet());
+                    .collect(Collectors.toSet());
             membership.setPermissions(permissions);
         }
-        User user = membership.getUser();
-        if (membershipStatus != null) {
-            if(membershipStatus == MembershipStatus.DECLINED){
-                if(Objects.equals(user.getCurrentStoreId(), membership.getStore().getId())) {
-                    user.setCurrentStoreId(null);
-                    userRepository.save(user);
-                }
-                membership.setPermissions(new HashSet<>());
-                membership.setMembershipStatus(membershipStatus);
-            }
-            membership.setMembershipStatus(membershipStatus);
 
-            if (membershipStatus == MembershipStatus.INACTIVE) {
-                notificationService.addNewNotification(
-                        membership,
-                        null,
-                        null,
-                        membership.getSender(), NotificationType.COLLABORATOR_REMOVAL);
-            } else if (membershipStatus == MembershipStatus.PENDING) {
-                notificationService.addNewNotification(
-                        membership,
-                        null,
-                        null,
-                        membership.getSender(),
-                        NotificationType.STORE_INVITE);
-            } else {
-                notificationService.addNewNotification(
-                        membership,
-                        null,
-                        null,
-                        membership.getSender(),
-                        NotificationType.INVITE_REPLY);
+        if (membershipStatus == null) {
+            return membershipResponseMapper.apply(membershipRepository.save(membership));
+        }
+
+        User user = membership.getUser();
+        if (membershipStatus == MembershipStatus.DECLINED) {
+            if (Objects.equals(user.getCurrentStoreId(), membership.getStore().getId())) {
+                user.setCurrentStoreId(null);
+                userRepository.save(user);
+            }
+            membership.setPermissions(new HashSet<>());
+            membership.setMembershipStatus(membershipStatus);
+        } else if (membershipStatus == MembershipStatus.INACTIVE) {
+            Integer storeId = membership.getStore().getId();
+            if (Objects.equals(user.getCurrentStoreId(), storeId)) {
+                Store nextCurrentStore = storeRepository.
+                        findFirstByMembersUserAndStatusAndIdNotAndMembersMembershipStatusNot(
+                                user,
+                                StoreStatus.OPEN,
+                                storeId,
+                                MembershipStatus.INACTIVE)
+                        .orElse(null);
+                user.setCurrentStoreId(nextCurrentStore != null ? nextCurrentStore.getId() : null);
+                userRepository.save(user);
             }
         }
 
-        return membershipResponseMapper.apply(membershipRepository.save(membership));
+        membership.setMembershipStatus(membershipStatus);
+        Membership updatedMembership = membershipRepository.save(membership);
+
+        if (membershipStatus == MembershipStatus.INACTIVE) {
+            notificationService.addNewNotification(
+                    membership,
+                    null,
+                    null,
+                    membership.getSender(), NotificationType.COLLABORATOR_REMOVAL);
+        } else if (membershipStatus == MembershipStatus.PENDING) {
+            notificationService.addNewNotification(
+                    membership,
+                    null,
+                    null,
+                    membership.getSender(),
+                    NotificationType.STORE_INVITE);
+        } else {
+            notificationService.addNewNotification(
+                    membership,
+                    null,
+                    null,
+                    membership.getSender(),
+                    NotificationType.INVITE_REPLY);
+        }
+
+        return membershipResponseMapper.apply(updatedMembership);
     }
 }
