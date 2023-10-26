@@ -145,6 +145,13 @@ public class MembershipServiceImplementation implements MembershipService {
     ) {
         Membership membership = membershipRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Membership does not exist."));
+
+        if (membership.getPermissions().contains(
+                permissionRepository.findByUserPermission(UserPermissions.OWNER)
+        )) {
+            throw new BadRequestException("Cannot update owner membership.");
+        }
+
         if (userPermissions != null && !userPermissions.isEmpty()) {
             if (userPermissions.contains(UserPermissions.OWNER)) {
                 throw new BadRequestException("Cannot set owner permission.");
