@@ -54,9 +54,18 @@ public class StoreServiceImplementation implements StoreService {
         );
 
         if(status == null)
-            stores = storeRepository.findAllByMembersUser(user, pageable);
+            stores = storeRepository.findByMembersUserAndMembersMembershipStatusNot(
+                    user,
+                    MembershipStatus.INACTIVE,
+                    pageable
+            );
         else
-            stores = storeRepository.findAllByMembersUserAndStatus(user, status, pageable);
+            stores = storeRepository.findByMembersUserAndStatusAndMembersMembershipStatusNot(
+                    user,
+                    status,
+                    MembershipStatus.INACTIVE,
+                    pageable
+            );
 
         return stores.stream()
                 .map(storeResponseMapper)
@@ -68,7 +77,11 @@ public class StoreServiceImplementation implements StoreService {
         User user = userRepository.findByUsername(jwtService.extractUsername(token))
                 .orElseThrow(() -> new NotFoundException("User not found."));
 
-        Optional<Store> store = storeRepository.findByIdAndMembersUser(id, user);
+        Optional<Store> store = storeRepository.findByIdAndMembersUserAndMembersMembershipStatusNot(
+                id,
+                user,
+                MembershipStatus.INACTIVE
+        );
 
         return store.map(storeResponseMapper)
                 .orElseThrow(() -> new NotFoundException("Store not found."));
@@ -113,7 +126,11 @@ public class StoreServiceImplementation implements StoreService {
             List<User> users = userRepository.findByCurrentStoreId(id);
             if(!users.isEmpty()) {
                 for(User user: users) {
-                    Store nextCurrentStore = storeRepository.findFirstByMembersUserAndStatusAndIdNot(user, StoreStatus.OPEN, id).orElse(null);
+                    Store nextCurrentStore = storeRepository.findFirstByMembersUserAndStatusAndIdNotAndMembersMembershipStatusNot(
+                            user,
+                            StoreStatus.OPEN, id,
+                            MembershipStatus.INACTIVE
+                    ).orElse(null);
                     user.setCurrentStoreId(nextCurrentStore != null ? nextCurrentStore.getId() : null);
                     userRepository.save(user);
                 }
