@@ -67,9 +67,15 @@ public interface IncomingRepository extends JpaRepository<Incoming, Integer> {
     )
     Double getTotalInByProductId(Integer productId);
 
-    Optional<Incoming> findFirstByActualQuantityGreaterThanAndProductIdOrderByExpirationDateDesc(Double actualQuantity, Integer id);
+    Optional<Incoming> findFirstByActualQuantityGreaterThanAndProductId(
+            Double actualQuantity,
+            Integer id
+    );
 
-    Optional<Incoming> findFirstByActualQuantityGreaterThanAndProductIdOrderByExpirationDateAsc(Double actualQuantity, Integer id);
+    Optional<Incoming> findFirstByActualQuantityGreaterThanAndProductIdOrderByExpirationDateAsc(
+            Double actualQuantity,
+            Integer id
+    );
 
     @Query(
             "SELECT COALESCE(SUM(incoming.actualQuantity), 0) " +
@@ -78,4 +84,11 @@ public interface IncomingRepository extends JpaRepository<Incoming, Integer> {
                     "AND incoming.product.store.id = :storeId"
     )
     Double getTotalNearExpiryItemsByStoreId(Integer storeId, LocalDate date);
+
+    List<Incoming> findByExpirationDateLessThanEqualAndExpirationDateGreaterThanAndActualQuantityGreaterThan(
+            LocalDate expirationDate,
+            LocalDate expirationDate1,
+            Double actualQuantity
+    );
+
 }

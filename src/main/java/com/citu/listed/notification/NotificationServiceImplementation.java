@@ -20,10 +20,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
@@ -41,7 +43,6 @@ public class NotificationServiceImplementation implements NotificationService {
     private final UserResponseMapper userResponseMapper;
     private final NotificationResponseMapper notificationResponseMapper;
     private final JwtService jwtService;
-
 
     @Transactional
     @Override
@@ -64,7 +65,7 @@ public class NotificationServiceImplementation implements NotificationService {
             } else if (notificationType == NotificationType.EXPIRATION) {
                 objectNode.put("product", mapper.writeValueAsString(incoming.getProduct()));
                 objectNode.put("quantity", incoming.getActualQuantity());
-                objectNode.put("expirationDate", mapper.writeValueAsString(incoming.getExpirationDate()));
+                objectNode.put("expirationDate", incoming.getExpirationDate().toString());
                 objectNode.put("store", mapper.writeValueAsString(incoming.getProduct().getStore()));
             } else if (notificationType == NotificationType.COLLABORATOR_REMOVAL) {
                 objectNode.put("recipient", mapper.writeValueAsString(userResponseMapper.apply(membership.getUser())));
@@ -139,8 +140,6 @@ public class NotificationServiceImplementation implements NotificationService {
         return notificationResponseMapper.apply(notificationBroadcast);
     }
 
-
-
     private List<User> getRecipientsForMembership(Membership membership, User user, NotificationType type) {
         List<User> recipients = new ArrayList<>();
 
@@ -159,6 +158,7 @@ public class NotificationServiceImplementation implements NotificationService {
 
         return recipients;
     }
+
     private List<User> getRecipientsForProduct(Product product) {
         List<User> recipients = userRepository .findByMemberships_StoreAndMemberships_Permissions_UserPermissionAndMemberships_MembershipStatus(
                 product.getStore(),
@@ -172,4 +172,22 @@ public class NotificationServiceImplementation implements NotificationService {
 
         return recipients;
     }
+
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void scheduledNearExpiryAlerts() {
+        List<Incoming> incomingList = incomingRepository.findByExpirationDateLessThanEqualAndExpirationDateGreaterThanAndActualQuantityGreaterThan(
+                LocalDate.now().plusDays(14),
+                LocalDate.now(),
+                0.0
+        );
+
+        incomingList.forEach(incoming -> addNewNotification(
+                null,
+                null,
+                incoming,
+                null,
+                NotificationType.EXPIRATION
+        ));
+    }
+
 }
