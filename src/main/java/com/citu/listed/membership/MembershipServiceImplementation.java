@@ -139,10 +139,14 @@ public class MembershipServiceImplementation implements MembershipService {
     @Override
     @Transactional
     public MembershipResponse updateCollaborator(
+            String token,
             Integer id,
             Set<UserPermissions> userPermissions,
             MembershipStatus membershipStatus
     ) {
+        User sender = userRepository.findByUsername(jwtService.extractUsername(token))
+                .orElseThrow(() -> new NotFoundException("Sender not found."));
+
         Membership membership = membershipRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Membership does not exist."));
 
@@ -187,32 +191,25 @@ public class MembershipServiceImplementation implements MembershipService {
                 user.setCurrentStoreId(nextCurrentStore != null ? nextCurrentStore.getId() : null);
                 userRepository.save(user);
             }
+            membership.setSender(sender);
+        } else if (membershipStatus == MembershipStatus.PENDING) {
+            membership.setSender(sender);
         }
 
         membership.setMembershipStatus(membershipStatus);
         Membership updatedMembership = membershipRepository.save(membership);
 
-        if (membershipStatus == MembershipStatus.INACTIVE) {
-            notificationService.addNewNotification(
-                    membership,
-                    null,
-                    null,
-                    membership.getSender(), NotificationType.COLLABORATOR_REMOVAL);
-        } else if (membershipStatus == MembershipStatus.PENDING) {
-            notificationService.addNewNotification(
-                    membership,
-                    null,
-                    null,
-                    membership.getSender(),
-                    NotificationType.STORE_INVITE);
-        } else {
-            notificationService.addNewNotification(
-                    membership,
-                    null,
-                    null,
-                    membership.getSender(),
-                    NotificationType.INVITE_REPLY);
-        }
+        notificationService.addNewNotification(
+                membership,
+                null,
+                null,
+                updatedMembership.getSender(),
+                membershipStatus == MembershipStatus.INACTIVE
+                        ? NotificationType.COLLABORATOR_REMOVAL
+                        : membershipStatus == MembershipStatus.PENDING
+                                ? NotificationType.STORE_INVITE
+                                : NotificationType.INVITE_REPLY
+        );
 
         return membershipResponseMapper.apply(updatedMembership);
     }
