@@ -25,19 +25,19 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(
             @RequestBody @Valid UserRequest request
-    ){
+    ) {
         return new ResponseEntity<>(userService.register(request), HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
     public ResponseEntity<AuthenticationResponse> authenticate(
             @RequestBody AuthenticationRequest request
-    ){
+    ) {
         return ResponseEntity.ok(userService.authenticate(request));
     }
 
     @GetMapping("users/validation/username")
-    public ResponseEntity<Object> validateUsername(@RequestParam String username){
+    public ResponseEntity<Object> validateUsername(@RequestParam String username) {
         return new ResponseEntity<>(
                 new ValidationResponse(userService.validateUsername(username)),
                 HttpStatus.OK);
@@ -63,11 +63,11 @@ public class UserController {
     }
 
     @GetMapping("users/validation/password")
-    public ResponseEntity<Object> validatePassword(@RequestHeader HttpHeaders headers ,@RequestParam String password){
+    public ResponseEntity<Object> validatePassword(@RequestHeader HttpHeaders headers, @RequestParam String password) {
         String token = headers.getFirst(HttpHeaders.AUTHORIZATION).substring(7);
 
         return new ResponseEntity<>(
-                new ValidationResponse(userService.validatePassword(password,token)),HttpStatus.OK);
+                new ValidationResponse(userService.validatePassword(password, token)), HttpStatus.OK);
     }
 
     @GetMapping("users/validation/token")
@@ -75,8 +75,8 @@ public class UserController {
         String token = headers.getFirst(HttpHeaders.AUTHORIZATION).substring(7);
 
         return new ResponseEntity<>(
-                new ValidationResponse(userService.validateToken(token)),HttpStatus.OK);
+                new ValidationResponse(userService.validateToken(token)), HttpStatus.OK);
     }
-    
+
 }
 

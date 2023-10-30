@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Product")
@@ -37,11 +38,13 @@ public class ProductController {
     }
 
     @Operation(description = "Get product details by id.")
+    @PreAuthorize("@MethodSecurity.hasPermission('VIEW_PRODUCT_DETAILS')")
     @GetMapping("/{id}")
     public ResponseEntity<Object> getProduct(@PathVariable Integer id) {
         return new ResponseEntity<>(productService.getProduct(id), HttpStatus.OK);
     }
 
+    @PreAuthorize("@MethodSecurity.hasPermission('ADD_PRODUCT')")
     @PostMapping("")
     public ResponseEntity<Object> addNewProduct(
             @RequestParam Integer storeId,
@@ -50,6 +53,7 @@ public class ProductController {
         return new ResponseEntity<>(productService.addNewProduct(storeId, product), HttpStatus.CREATED);
     }
 
+    @PreAuthorize("@MethodSecurity.hasPermission('UPDATE_PRODUCT')")
     @PutMapping("/{id}")
     public ResponseEntity<Object> updateProduct(
             @PathVariable Integer id,
@@ -58,6 +62,7 @@ public class ProductController {
         return new ResponseEntity<>(productService.updateProduct(id, product), HttpStatus.OK);
     }
 
+    @PreAuthorize("@MethodSecurity.hasPermission('DELETE_PRODUCT')")
     @DeleteMapping("{id}")
     public ResponseEntity<Object> deleteProduct(@PathVariable Integer id) {
         return new ResponseEntity<>(productService.deleteProduct(id), HttpStatus.OK);

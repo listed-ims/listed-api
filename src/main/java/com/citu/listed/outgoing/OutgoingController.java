@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -22,9 +23,15 @@ public class OutgoingController {
 
     private final OutgoingService outgoingService;
 
+    @PreAuthorize("@MethodSecurity.hasAnyPermission(" +
+            "'ADD_OUTGOING_SOLD'," +
+            "'ADD_OUTGOING_DEFECTS'," +
+            "'ADD_OUTGOING_EXPIRED'," +
+            "'ADD_OUTGOING_LOST'," +
+            "'ADD_OUTGOING_CONSUMED')")
     @PostMapping("/outgoing")
     public ResponseEntity<Object> outProducts(@RequestHeader HttpHeaders headers,
-                                              @RequestBody @Valid OutgoingRequest request){
+                                              @RequestBody @Valid OutgoingRequest request) {
 
         String token = headers.getFirst(HttpHeaders.AUTHORIZATION).substring(7);
 
@@ -33,6 +40,7 @@ public class OutgoingController {
         return new ResponseEntity<>(outgoingResponse, HttpStatus.CREATED);
     }
 
+    @PreAuthorize("@MethodSecurity.hasPermission('GET_TRANSACTIONS_LIST')")
     @GetMapping("/outgoing")
     public ResponseEntity<Object> getOutgoingTransactions(
             @RequestParam Integer storeId,
@@ -44,7 +52,7 @@ public class OutgoingController {
             @RequestParam(defaultValue = "1") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "DESC") Sort.Direction sortOrder
-    ){
+    ) {
         return new ResponseEntity<>(
                 outgoingService.getOutgoingTransactions(
                         storeId,
@@ -57,11 +65,12 @@ public class OutgoingController {
                         pageSize,
                         sortOrder
                 )
-                ,HttpStatus.OK);
+                , HttpStatus.OK);
     }
-    
+
+    @PreAuthorize("@MethodSecurity.hasPermission('GET_OUTGOING_DETAILS')")
     @GetMapping("/outgoing/{id}")
-    public ResponseEntity<Object> getOutgoingTransaction(@PathVariable Integer id){
-        return new ResponseEntity<>(outgoingService.getOutgoingTransaction(id),HttpStatus.OK);
+    public ResponseEntity<Object> getOutgoingTransaction(@PathVariable Integer id) {
+        return new ResponseEntity<>(outgoingService.getOutgoingTransaction(id), HttpStatus.OK);
     }
 }
