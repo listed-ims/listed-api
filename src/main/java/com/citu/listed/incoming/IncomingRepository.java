@@ -40,18 +40,11 @@ public interface IncomingRepository extends JpaRepository<Incoming, Integer> {
     Long countByTransactionDate(LocalDateTime transactionDate);
 
     @Query(
-            "SELECT COALESCE(SUM(incoming.actualQuantity), 0) " +
-                    "FROM Incoming incoming " +
-                    "WHERE incoming.product.store.id = :storeId"
-    )
-    Double getTotalProductsByStoreId(Integer storeId);
-
-    @Query(
             "SELECT COALESCE(SUM(incoming.actualQuantity * incoming.purchasePrice), 0) " +
                     "FROM Incoming incoming " +
                     "WHERE incoming.product.store.id = :storeId"
     )
-    Double getTotalPriceValueByStoreId(Integer storeId);
+    Double getInventoryValueByStoreId(Integer storeId);
 
     @Query(
             "SELECT COALESCE(SUM(incoming.actualQuantity), 0) " +

@@ -1,6 +1,5 @@
 package com.citu.listed.store;
 
-import com.citu.listed.store.enums.StoreStatus;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,14 +20,12 @@ public class StoreController {
     @GetMapping("")
     public ResponseEntity<Object> getStores(
             @RequestHeader HttpHeaders headers,
-            @RequestParam(defaultValue = "") StoreStatus status,
             @RequestParam(defaultValue = "1") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize
     ) {
         return new ResponseEntity<>(
                 storeService.getStores(
                         headers.getFirst(HttpHeaders.AUTHORIZATION).substring(7),
-                        status,
                         pageNumber,
                         pageSize
                         ),
@@ -54,11 +51,4 @@ public class StoreController {
         return new ResponseEntity<>(storeService.createStore(token, store), HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Object> updateStore(
-            @PathVariable Integer id,
-            @RequestBody @Valid Store store
-    ) {
-        return new ResponseEntity<>(storeService.updateStore(id, store), HttpStatus.OK);
-    }
 }

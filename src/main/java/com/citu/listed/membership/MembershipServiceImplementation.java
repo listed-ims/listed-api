@@ -13,7 +13,6 @@ import com.citu.listed.shared.exception.BadRequestException;
 import com.citu.listed.shared.exception.NotFoundException;
 import com.citu.listed.store.Store;
 import com.citu.listed.store.StoreRepository;
-import com.citu.listed.store.enums.StoreStatus;
 import com.citu.listed.user.User;
 import com.citu.listed.user.UserRepository;
 import com.citu.listed.user.config.JwtService;
@@ -178,9 +177,8 @@ public class MembershipServiceImplementation implements MembershipService {
             Integer storeId = membership.getStore().getId();
             if (Objects.equals(user.getCurrentStoreId(), storeId)) {
                 Store nextCurrentStore = storeRepository.
-                        findFirstByMembersUserAndStatusAndIdNotAndMembersMembershipStatusNot(
+                        findFirstByMembersUserAndIdNotAndMembersMembershipStatusNot(
                                 user,
-                                StoreStatus.OPEN,
                                 storeId,
                                 MembershipStatus.INACTIVE)
                         .orElse(null);

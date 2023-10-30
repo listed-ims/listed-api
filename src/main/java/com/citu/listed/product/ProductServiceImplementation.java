@@ -9,7 +9,6 @@ import com.citu.listed.product.enums.ProductUnit;
 import com.citu.listed.product.mappers.ProductResponseMapper;
 import com.citu.listed.store.Store;
 import com.citu.listed.store.StoreRepository;
-import com.citu.listed.store.enums.StoreStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -75,9 +74,7 @@ public class ProductServiceImplementation implements ProductService{
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new NotFoundException("Store not found."));
 
-        if(store.getStatus() != StoreStatus.OPEN)
-            throw new BadRequestException("Store is CLOSED. Cannot add new product.");
-        else if(!validateBarcode(store.getId(), product.getBarcode()))
+        if(!validateBarcode(store.getId(), product.getBarcode()))
             throw new BadRequestException("Barcode must be unique.");
 
         Product newProduct = Product.builder()
