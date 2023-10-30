@@ -19,6 +19,7 @@ public interface MembershipService {
     );
     MembershipResponse getCollaborator(Integer membershipId);
     MembershipResponse updateCollaborator(
+            String token,
             Integer id,
             Set<UserPermissions> permissions,
             MembershipStatus membershipStatus

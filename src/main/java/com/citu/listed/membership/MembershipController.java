@@ -60,12 +60,14 @@ public class MembershipController {
 
     @PutMapping("/{id}")
     public ResponseEntity<MembershipResponse> updateCollaborator(
+            @RequestHeader HttpHeaders headers,
             @PathVariable Integer id,
             @RequestBody(required = false) Set<UserPermissions> userPermissions,
             @RequestParam(defaultValue = "") MembershipStatus membershipStatus
     ){
+        String token = headers.getFirst(HttpHeaders.AUTHORIZATION).substring(7);
         return new ResponseEntity<>(
-                membershipService.updateCollaborator(id, userPermissions, membershipStatus),
+                membershipService.updateCollaborator(token, id, userPermissions, membershipStatus),
                 HttpStatus.OK
         );
     }
