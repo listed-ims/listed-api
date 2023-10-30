@@ -1,5 +1,6 @@
 package com.citu.listed.incoming;
 
+import com.citu.listed.shared.exception.BadRequestException;
 import com.citu.listed.shared.exception.NotFoundException;
 import com.citu.listed.incoming.dtos.IncomingRequest;
 import com.citu.listed.incoming.dtos.IncomingResponse;
@@ -44,6 +45,10 @@ public class IncomingServiceImplementation implements IncomingService {
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException("Product not found."));
+
+        if (request.getPurchasePrice() > product.getSalePrice()) {
+            throw new BadRequestException("Sale price must be greater than purchase price.");
+        }
 
         LocalDateTime transactionDate = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
 
