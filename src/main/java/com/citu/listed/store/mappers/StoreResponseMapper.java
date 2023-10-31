@@ -1,10 +1,7 @@
 package com.citu.listed.store.mappers;
 
 import com.citu.listed.incoming.IncomingRepository;
-import com.citu.listed.outgoing.OutgoingRepository;
-import com.citu.listed.outgoing.enums.OutgoingCategory;
 import com.citu.listed.permission.enums.UserPermissions;
-import com.citu.listed.product.ProductRepository;
 import com.citu.listed.store.Store;
 import com.citu.listed.store.dtos.StoreResponse;
 import com.citu.listed.user.UserRepository;
@@ -12,7 +9,6 @@ import com.citu.listed.user.mappers.UserResponseMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.function.Function;
 
 @Service
@@ -33,9 +29,7 @@ public class StoreResponseMapper implements Function<Store, StoreResponse> {
                                 store,
                                 UserPermissions.OWNER)
                 ),
-                store.getStatus(),
-                incomingRepository.getTotalProductsByStoreId(store.getId()),
-                incomingRepository.getTotalPriceValueByStoreId(store.getId())
+                incomingRepository.getInventoryValueByStoreId(store.getId())
         );
     }
 }

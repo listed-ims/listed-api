@@ -7,7 +7,6 @@ import com.citu.listed.shared.exception.NotFoundException;
 import com.citu.listed.membership.Membership;
 import com.citu.listed.membership.MembershipRepository;
 import com.citu.listed.store.dtos.StoreResponse;
-import com.citu.listed.store.enums.StoreStatus;
 import com.citu.listed.store.mappers.StoreResponseMapper;
 import com.citu.listed.user.User;
 import com.citu.listed.user.UserRepository;
@@ -38,7 +37,6 @@ public class StoreServiceImplementation implements StoreService {
     @Override
     public List<StoreResponse> getStores(
             String token,
-            StoreStatus status,
             int pageNumber,
             int pageSize
     ) {
@@ -49,23 +47,14 @@ public class StoreServiceImplementation implements StoreService {
         Pageable pageable = PageRequest.of(
                 pageNumber - 1,
                 pageSize,
-                Sort.by(Sort.Direction.DESC,"status")
-                        .and(Sort.by("name"))
+                Sort.by(Sort.Direction.ASC,"name")
         );
 
-        if(status == null)
-            stores = storeRepository.findByMembersUserAndMembersMembershipStatusNot(
-                    user,
-                    MembershipStatus.INACTIVE,
-                    pageable
-            );
-        else
-            stores = storeRepository.findByMembersUserAndStatusAndMembersMembershipStatusNot(
-                    user,
-                    status,
-                    MembershipStatus.INACTIVE,
-                    pageable
-            );
+        stores = storeRepository.findByMembersUserAndMembersMembershipStatusNot(
+                user,
+                MembershipStatus.INACTIVE,
+                pageable
+        );
 
         return stores.stream()
                 .map(storeResponseMapper)
@@ -96,10 +85,9 @@ public class StoreServiceImplementation implements StoreService {
         Store newStore = storeRepository.save(
                 Store.builder()
                         .name(store.getName())
-                        .status(StoreStatus.OPEN)
                         .build());
 
-        Membership membership = membershipRepository.save(
+        membershipRepository.save(
                 Membership.builder()
                         .store(newStore)
                         .user(user)
@@ -111,33 +99,6 @@ public class StoreServiceImplementation implements StoreService {
             user.setCurrentStoreId(newStore.getId());
 
         return storeResponseMapper.apply(newStore);
-    }
-
-    @Override
-    @Transactional
-    public StoreResponse updateStore(Integer id, Store store) {
-        Store storeToUpdate = storeRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Store to update not found."));
-
-        storeToUpdate.setName(store.getName());
-        storeToUpdate.setStatus(store.getStatus());
-
-        if(store.getStatus() == StoreStatus.CLOSED) {
-            List<User> users = userRepository.findByCurrentStoreId(id);
-            if(!users.isEmpty()) {
-                for(User user: users) {
-                    Store nextCurrentStore = storeRepository.findFirstByMembersUserAndStatusAndIdNotAndMembersMembershipStatusNot(
-                            user,
-                            StoreStatus.OPEN, id,
-                            MembershipStatus.INACTIVE
-                    ).orElse(null);
-                    user.setCurrentStoreId(nextCurrentStore != null ? nextCurrentStore.getId() : null);
-                    userRepository.save(user);
-                }
-            }
-        }
-
-        return storeResponseMapper.apply(storeRepository.save(storeToUpdate));
     }
 
 }
