@@ -8,8 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -24,6 +24,7 @@ public class IncomingController {
 
     private final IncomingService incomingService;
 
+    @PreAuthorize("@MethodSecurity.hasPermission('ADD_INCOMING')")
     @PostMapping("/incoming")
     public ResponseEntity<IncomingResponse> inProduct(@RequestHeader HttpHeaders headers,
                                                       @RequestParam Integer productId,
@@ -31,11 +32,12 @@ public class IncomingController {
 
         String token = headers.getFirst(HttpHeaders.AUTHORIZATION).substring(7);
 
-        IncomingResponse incomingResponse = incomingService.inProduct(token,productId,request);
+        IncomingResponse incomingResponse = incomingService.inProduct(token, productId, request);
 
         return new ResponseEntity<>(incomingResponse, HttpStatus.CREATED);
     }
 
+    @PreAuthorize("@MethodSecurity.hasPermission('GET_TRANSACTIONS_LIST')")
     @GetMapping("/incoming")
     public ResponseEntity<Object> getIncomingTransactions(
             @RequestParam Integer storeId,
@@ -46,7 +48,7 @@ public class IncomingController {
             @RequestParam(defaultValue = "1") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "DESC") Sort.Direction sortOrder
-    ){
+    ) {
         return new ResponseEntity<>(
                 incomingService.getIncomingTransactions(
                         storeId,
@@ -62,9 +64,10 @@ public class IncomingController {
         );
     }
 
+    @PreAuthorize("@MethodSecurity.hasPermission('GET_INCOMING_DETAILS')")
     @GetMapping("/incoming/{id}")
-    public ResponseEntity<Object> getIncomingTransaction(@PathVariable Integer id){
-        return new ResponseEntity<>(incomingService.getIncomingTransaction(id),HttpStatus.OK);
+    public ResponseEntity<Object> getIncomingTransaction(@PathVariable Integer id) {
+        return new ResponseEntity<>(incomingService.getIncomingTransaction(id), HttpStatus.OK);
     }
 
 }

@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,16 +25,17 @@ public class MembershipController {
 
     private final MembershipService membershipService;
 
+    @PreAuthorize("@MethodSecurity.hasPermission('ADD_COLLABORATOR')")
     @PostMapping("")
     public ResponseEntity<MembershipResponse> addCollaborator(
             @RequestHeader HttpHeaders headers,
             @RequestBody @Valid MembershipRequest membership
-    )
-    {
+    ) {
         String token = headers.getFirst(HttpHeaders.AUTHORIZATION).substring(7);
-        return new ResponseEntity<>(membershipService.addCollaborator(token,membership), HttpStatus.CREATED);
+        return new ResponseEntity<>(membershipService.addCollaborator(token, membership), HttpStatus.CREATED);
     }
 
+    @PreAuthorize("@MethodSecurity.hasPermission('VIEW_COLLABORATORS')")
     @GetMapping("")
     public ResponseEntity<List<MembershipResponse>> getCollaborators(
             @RequestParam Integer storeId,
@@ -41,7 +43,7 @@ public class MembershipController {
             @RequestParam(defaultValue = "") Integer userId,
             @RequestParam(defaultValue = "1") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize
-            ){
+    ) {
         return new ResponseEntity<>(
                 membershipService.getCollaborators(
                         storeId,
@@ -53,18 +55,22 @@ public class MembershipController {
         );
     }
 
+    @PreAuthorize("@MethodSecurity.hasPermission('VIEW_COLLABORATOR_DETAILS')")
     @GetMapping("/{id}")
-    public ResponseEntity<MembershipResponse> getCollaborator(@PathVariable Integer id){
+    public ResponseEntity<MembershipResponse> getCollaborator(@PathVariable Integer id) {
         return new ResponseEntity<>(membershipService.getCollaborator(id), HttpStatus.OK);
     }
 
+    @PreAuthorize("@MethodSecurity.hasAnyPermission(" +
+            "'UPDATE_COLLABORATOR', " +
+            "'DELETE_COLLABORATOR')")
     @PutMapping("/{id}")
     public ResponseEntity<MembershipResponse> updateCollaborator(
             @RequestHeader HttpHeaders headers,
             @PathVariable Integer id,
             @RequestBody(required = false) Set<UserPermissions> userPermissions,
             @RequestParam(defaultValue = "") MembershipStatus membershipStatus
-    ){
+    ) {
         String token = headers.getFirst(HttpHeaders.AUTHORIZATION).substring(7);
         return new ResponseEntity<>(
                 membershipService.updateCollaborator(token, id, userPermissions, membershipStatus),
