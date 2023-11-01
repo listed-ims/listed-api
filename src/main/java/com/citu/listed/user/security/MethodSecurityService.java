@@ -18,7 +18,7 @@ public class MethodSecurityService {
     Authentication authentication;
 
     public boolean hasPermission(String permission) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || authentication.getPrincipal() == null) {
             return false;
@@ -39,7 +39,7 @@ public class MethodSecurityService {
     }
 
     public boolean hasAnyPermission(String... permissions) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();
 
         if (user.getCurrentStoreId() == null) {
