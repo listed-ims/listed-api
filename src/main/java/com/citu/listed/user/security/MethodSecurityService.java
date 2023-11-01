@@ -8,40 +8,54 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Service("MethodSecurity")
 @RequiredArgsConstructor
 public class MethodSecurityService {
     Authentication authentication;
 
     public boolean hasPermission(String permission) {
-        authentication = SecurityContextHolder.getContext().getAuthentication();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || authentication.getPrincipal() == null) {
+            return false;
+        }
 
         User user = (User) authentication.getPrincipal();
+        Integer storeId = user.getCurrentStoreId();
 
-        SimpleGrantedAuthority authority = new SimpleGrantedAuthority(user.getCurrentStoreId() + "_" + permission);
-        SimpleGrantedAuthority ownerAuthority = new SimpleGrantedAuthority(user.getCurrentStoreId() + "_" + UserPermissions.OWNER);
+        if (storeId == null) {
+            return false;
+        }
 
-        return user.getAuthorities().contains(ownerAuthority) ||
-                user.getAuthorities().contains(authority);
+        SimpleGrantedAuthority requiredAuthority = new SimpleGrantedAuthority(storeId + "_" + permission);
+        SimpleGrantedAuthority ownerAuthority = new SimpleGrantedAuthority(storeId + "_" + UserPermissions.OWNER);
 
+        return user.getAuthorities().stream()
+                .anyMatch(authority -> authority.equals(requiredAuthority) || authority.equals(ownerAuthority));
     }
 
     public boolean hasAnyPermission(String... permissions) {
-        authentication = SecurityContextHolder.getContext().getAuthentication();
-
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();
 
-        SimpleGrantedAuthority ownerAuthority = new SimpleGrantedAuthority(user.getCurrentStoreId() + "_" + UserPermissions.OWNER);
-
-        for (String permission : permissions) {
-            SimpleGrantedAuthority authority = new SimpleGrantedAuthority(user.getCurrentStoreId() + "_" + permission);
-
-            if (user.getAuthorities().contains(ownerAuthority) ||
-                    user.getAuthorities().contains(authority)) {
-                return true;
-            }
+        if (user.getCurrentStoreId() == null) {
+            return false;
         }
 
-        return false;
+        Integer storeId = user.getCurrentStoreId();
+
+        Set<SimpleGrantedAuthority> authorities = Arrays.stream(permissions)
+                .map(permission -> new SimpleGrantedAuthority(storeId + "_" + permission))
+                .collect(Collectors.toSet());
+
+        SimpleGrantedAuthority ownerAuthority = new SimpleGrantedAuthority(storeId + "_" + UserPermissions.OWNER);
+
+        return user.getAuthorities().contains(ownerAuthority)
+                || user.getAuthorities().stream().anyMatch(authorities::contains);
+
     }
 }
