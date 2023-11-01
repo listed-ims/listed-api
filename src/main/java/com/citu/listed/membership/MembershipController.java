@@ -61,6 +61,20 @@ public class MembershipController {
         return new ResponseEntity<>(membershipService.getCollaborator(id), HttpStatus.OK);
     }
 
+    @GetMapping("/membership")
+    public ResponseEntity<MembershipResponse> getMembership(
+            @RequestParam Integer storeId,
+            @RequestParam Integer userId
+    ) {
+        return new ResponseEntity<>(membershipService.getCollaborators(
+                storeId,
+                null,
+                userId,
+                1,
+                1
+        ).get(0), HttpStatus.OK);
+    }
+
     @PreAuthorize("@MethodSecurity.hasAnyPermission(" +
             "'UPDATE_COLLABORATOR', " +
             "'DELETE_COLLABORATOR')")
