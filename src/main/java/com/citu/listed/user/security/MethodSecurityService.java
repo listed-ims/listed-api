@@ -35,7 +35,7 @@ public class MethodSecurityService {
         SimpleGrantedAuthority ownerAuthority = new SimpleGrantedAuthority(storeId + "_" + UserPermissions.OWNER);
 
         return user.getAuthorities().stream()
-                .anyMatch(authority -> authority.equals(requiredAuthority) || authority.equals(ownerAuthority));
+                .anyMatch(authority -> authority.equals(ownerAuthority) || authority.equals(requiredAuthority));
     }
 
     public boolean hasAnyPermission(String... permissions) {
