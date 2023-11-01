@@ -10,18 +10,22 @@ import java.util.Set;
 
 public interface MembershipService {
     MembershipResponse addCollaborator(String token, MembershipRequest membership);
+
     List<MembershipResponse> getCollaborators(
             Integer storeId,
             MembershipStatus membershipStatus,
-            Integer userId,
             int pageNumber,
             int pageSize
     );
+
     MembershipResponse getCollaborator(Integer membershipId);
+
     MembershipResponse updateCollaborator(
             String token,
             Integer id,
             Set<UserPermissions> permissions,
             MembershipStatus membershipStatus
     );
+
+    MembershipResponse getMembership(String token, Integer storeId);
 }

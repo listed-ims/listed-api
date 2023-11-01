@@ -8,12 +8,16 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface MembershipRepository extends JpaRepository<Membership, Integer> {
     boolean existsByStoreAndUser(Store store, User user);
+
     List<Membership> findByStoreAndMembershipStatus(Store store, MembershipStatus membershipStatus, Pageable pageable);
-    Membership findByStoreAndMembershipStatusAndUser(Store store, MembershipStatus membershipStatus, User user);
+    
     List<Membership> findByStore(Store store, Pageable pageable);
-    Membership findByStoreAndUser(Store store, User user);
+
+    Optional<Membership> findByStoreAndUserAndMembershipStatusNot(Store store, User user, MembershipStatus membershipStatus);
+
 }

@@ -23,7 +23,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -88,7 +91,6 @@ public class MembershipServiceImplementation implements MembershipService {
     public List<MembershipResponse> getCollaborators(
             Integer storeId,
             MembershipStatus membershipStatus,
-            Integer userId,
             int pageNumber,
             int pageSize
     ) {
@@ -96,32 +98,16 @@ public class MembershipServiceImplementation implements MembershipService {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new NotFoundException("Store not found."));
 
-        User user = null;
-        if (userId != null) {
-            user = userRepository.findById(userId)
-                    .orElseThrow(() -> new NotFoundException("User not found."));
-        }
-
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("user.name"));
         List<Membership> memberships;
 
-        if (user == null) {
-            if (membershipStatus == null) {
-                memberships = membershipRepository.findByStore(store, pageable);
-            } else {
-                memberships = membershipRepository.
-                        findByStoreAndMembershipStatus(store, membershipStatus, pageable);
-            }
+        if (membershipStatus == null) {
+            memberships = membershipRepository.findByStore(store, pageable);
         } else {
-            if (membershipStatus == null) {
-                memberships = Collections.singletonList(
-                        membershipRepository.findByStoreAndUser(store, user)
-                );
-            } else {
-                memberships = Collections.singletonList(
-                        membershipRepository.findByStoreAndMembershipStatusAndUser(store, membershipStatus, user));
-            }
+            memberships = membershipRepository.
+                    findByStoreAndMembershipStatus(store, membershipStatus, pageable);
         }
+
         return memberships.stream()
                 .map(membershipResponseMapper)
                 .collect(Collectors.toList());
@@ -131,6 +117,23 @@ public class MembershipServiceImplementation implements MembershipService {
     public MembershipResponse getCollaborator(Integer membershipId) {
         Membership membership = membershipRepository.findById(membershipId)
                 .orElseThrow(() -> new NotFoundException("Membership not found."));
+
+        return membershipResponseMapper.apply(membership);
+    }
+
+    @Override
+    public MembershipResponse getMembership(String token, Integer storeId) {
+
+        User user = userRepository.findByUsername(jwtService.extractUsername(token))
+                .orElseThrow(() -> new NotFoundException("User not found."));
+
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new NotFoundException("Store not found."));
+
+        Membership membership = membershipRepository.findByStoreAndUserAndMembershipStatusNot(
+                        store, user, MembershipStatus.INACTIVE
+                )
+                .orElseThrow(() -> new NotFoundException("User membership not found."));
 
         return membershipResponseMapper.apply(membership);
     }
@@ -205,8 +208,8 @@ public class MembershipServiceImplementation implements MembershipService {
                 membershipStatus == MembershipStatus.INACTIVE
                         ? NotificationType.COLLABORATOR_REMOVAL
                         : membershipStatus == MembershipStatus.PENDING
-                                ? NotificationType.STORE_INVITE
-                                : NotificationType.INVITE_REPLY
+                        ? NotificationType.STORE_INVITE
+                        : NotificationType.INVITE_REPLY
         );
 
         return membershipResponseMapper.apply(updatedMembership);
