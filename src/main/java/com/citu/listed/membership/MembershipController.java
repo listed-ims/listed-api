@@ -40,7 +40,6 @@ public class MembershipController {
     public ResponseEntity<List<MembershipResponse>> getCollaborators(
             @RequestParam Integer storeId,
             @RequestParam(defaultValue = "") MembershipStatus membershipStatus,
-            @RequestParam(defaultValue = "") Integer userId,
             @RequestParam(defaultValue = "1") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize
     ) {
@@ -48,7 +47,6 @@ public class MembershipController {
                 membershipService.getCollaborators(
                         storeId,
                         membershipStatus,
-                        userId,
                         pageNumber,
                         pageSize
                 ), HttpStatus.OK
@@ -59,6 +57,15 @@ public class MembershipController {
     @GetMapping("/{id}")
     public ResponseEntity<MembershipResponse> getCollaborator(@PathVariable Integer id) {
         return new ResponseEntity<>(membershipService.getCollaborator(id), HttpStatus.OK);
+    }
+
+    @GetMapping("/membership")
+    public ResponseEntity<MembershipResponse> getMembership(
+            @RequestHeader HttpHeaders headers,
+            @RequestParam Integer storeId
+    ) {
+        String token = headers.getFirst(HttpHeaders.AUTHORIZATION).substring(7);
+        return new ResponseEntity<>(membershipService.getMembership(token, storeId), HttpStatus.OK);
     }
 
     @PreAuthorize("@MethodSecurity.hasAnyPermission(" +
