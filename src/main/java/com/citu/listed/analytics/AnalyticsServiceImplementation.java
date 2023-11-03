@@ -3,6 +3,7 @@ package com.citu.listed.analytics;
 import com.citu.listed.analytics.dtos.OutgoingValueResponse;
 import com.citu.listed.analytics.dtos.RevenueResponse;
 import com.citu.listed.analytics.dtos.SummaryResponse;
+import com.citu.listed.analytics.dtos.TopProductResponse;
 import com.citu.listed.analytics.enums.AnalyticsPeriodicity;
 import com.citu.listed.incoming.IncomingRepository;
 import com.citu.listed.outgoing.OutgoingRepository;
@@ -80,6 +81,43 @@ public class AnalyticsServiceImplementation implements AnalyticsService{
         }
 
         return revenueResponses;
+    }
+
+    @Override
+    public List<TopProductResponse> getTopProducts(
+            Integer id,
+            AnalyticsPeriodicity periodicity,
+            int pageNumber,
+            int pageSize
+    ) {
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
+        List<TopProductResponse> topProductResponses = new ArrayList<>();
+        List<Map<String, Object>> dateRanges =
+                periodicity == AnalyticsPeriodicity.WEEKLY
+                        ? outgoingRepository.getWeeklyDateRange(id, pageable)
+                        : outgoingRepository.getMonthlyDateRange(id, pageable);
+
+        for (Map<String, Object> dateRange : dateRanges) {
+            TopProductResponse topProductResponse = new TopProductResponse();
+
+            LocalDate startDate = getStartDate(
+                    periodicity,
+                    String.valueOf(dateRange.get("year")),
+                    String.valueOf(dateRange.get(periodicity == AnalyticsPeriodicity.WEEKLY ? "week" : "month"))
+            );
+            LocalDate endDate = getEndDate(
+                    periodicity,
+                    String.valueOf(dateRange.get("year")),
+                    String.valueOf(dateRange.get(periodicity == AnalyticsPeriodicity.WEEKLY ? "week" : "month"))
+            );
+
+            topProductResponse.setStartDate(startDate);
+            topProductResponse.setEndDate(endDate);
+            topProductResponse.setProducts(outgoingRepository.getTopSoldProductsByStoreId(id, startDate, endDate));
+
+            topProductResponses.add(topProductResponse);
+        }
+        return topProductResponses;
     }
 
     @Override

@@ -31,6 +31,16 @@ public class AnalyticsController {
         return new ResponseEntity<>(analyticsService.getRevenue(storeId, periodicity, pageNumber, pageSize), HttpStatus.OK);
     }
 
+    @GetMapping("/top-products")
+    public ResponseEntity<Object> getTopProducts(
+            @RequestParam Integer storeId,
+            @RequestParam AnalyticsPeriodicity periodicity,
+            @RequestParam(defaultValue = "1") int pageNumber,
+            @RequestParam(defaultValue = "1") int pageSize
+    ) {
+        return new ResponseEntity<>(analyticsService.getTopProducts(storeId, periodicity, pageNumber, pageSize), HttpStatus.OK);
+    }
+
     @GetMapping("/outgoing-value")
     public ResponseEntity<Object> getOugoingValue(
             @RequestParam Integer storeId,

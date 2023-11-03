@@ -1,6 +1,7 @@
 package com.citu.listed.outgoing;
 
 import com.citu.listed.analytics.dtos.CategoryValueResponse;
+import com.citu.listed.analytics.dtos.ProductSalesResponse;
 import com.citu.listed.outgoing.enums.OutgoingCategory;
 import com.citu.listed.store.Store;
 import org.springframework.data.domain.Pageable;
@@ -87,6 +88,21 @@ public interface OutgoingRepository extends JpaRepository<Outgoing, Integer> {
     Double getTotalItemsSoldByStoreId(Integer storeId, LocalDate startDate, LocalDate endDate);
 
     @Query(
+            "SELECT NEW com.citu.listed.analytics.dtos.ProductSalesResponse(product, SUM(outProduct.quantity)) " +
+                    "FROM Outgoing outgoing " +
+                    "INNER JOIN outgoing.products outProduct " +
+                    "INNER JOIN outProduct.product product " +
+                    "WHERE outProduct.product.store.id = :storeId " +
+                    "AND outgoing.category >= 'SALES' " +
+                    "AND DATE(outgoing.transactionDate) >= :startDate " +
+                    "AND DATE(outgoing.transactionDate) <= :endDate " +
+                    "GROUP BY product " +
+                    "ORDER BY SUM(outProduct.price) DESC " +
+                    "LIMIT 10"
+    )
+    List<ProductSalesResponse> getTopSoldProductsByStoreId(Integer storeId, LocalDate startDate, LocalDate endDate);
+
+    @Query(
             "SELECT COALESCE(SUM(outProduct.quantity), 0) " +
                     "FROM Outgoing outgoing " +
                     "JOIN outgoing.products outProduct " +
@@ -131,7 +147,7 @@ public interface OutgoingRepository extends JpaRepository<Outgoing, Integer> {
                                             "UNION ALL " +
                                             "SELECT DATE_ADD(end_date, INTERVAL 1 DAY), DATE_ADD(DATE_ADD(end_date, INTERVAL 1 MONTH), INTERVAL 1 DAY) " +
                                             "FROM MonthRanges " +
-                                            "WHERE YEAR(end_date) * 100 + MONTH(end_date) <= YEAR(MAX_DATE) * 100 + MONTH(MAX_DATE)) " +
+                                            "WHERE YEAR(end_date) * 100 + MONTH(end_date) <= YEAR(CURDATE()) * 100 + MONTH(CURDATE())) " +
                     "SELECT YEAR(start_date) AS year, LPAD(MONTH(start_date), 2, '0') AS month " +
                             "FROM MonthRanges " +
                             "LEFT JOIN out_transactions ON " +
