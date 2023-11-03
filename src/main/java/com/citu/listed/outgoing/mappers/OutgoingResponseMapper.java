@@ -20,6 +20,7 @@ public class OutgoingResponseMapper implements Function<Outgoing, OutgoingRespon
                 userResponseMapper.apply(outgoing.getUser()),
                 outgoing.getProducts(),
                 outgoing.getCategory(),
+                outgoing.getPrice(),
                 outgoing.getComment(),
                 outgoing.getTransactionDate(),
                 outgoing.getReferenceNumber()

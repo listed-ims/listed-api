@@ -1,12 +1,10 @@
 package com.citu.listed.analytics;
 
-import com.citu.listed.analytics.dtos.OutgoingValueResponse;
-import com.citu.listed.analytics.dtos.RevenueResponse;
-import com.citu.listed.analytics.dtos.SummaryResponse;
-import com.citu.listed.analytics.dtos.TopProductResponse;
+import com.citu.listed.analytics.dtos.*;
 import com.citu.listed.analytics.enums.AnalyticsPeriodicity;
 import com.citu.listed.incoming.IncomingRepository;
 import com.citu.listed.outgoing.OutgoingRepository;
+import com.citu.listed.outgoing.enums.OutgoingCategory;
 import com.citu.listed.product.ProductRepository;
 import com.citu.listed.shared.exception.NotFoundException;
 import com.citu.listed.store.Store;
@@ -136,6 +134,7 @@ public class AnalyticsServiceImplementation implements AnalyticsService{
 
         for (Map<String, Object> dateRange : dateRanges) {
             OutgoingValueResponse outgoingValueResponse = new OutgoingValueResponse();
+            List<CategoryValueResponse> categoryValueResponses = new ArrayList<>();
 
             LocalDate startDate = getStartDate(
                     periodicity,
@@ -148,9 +147,17 @@ public class AnalyticsServiceImplementation implements AnalyticsService{
                     String.valueOf(dateRange.get(periodicity == AnalyticsPeriodicity.WEEKLY ? "week" : "month"))
             );
 
+            for(OutgoingCategory category: OutgoingCategory.values()) {
+                if(category != OutgoingCategory.SALES)
+                    categoryValueResponses.add(new CategoryValueResponse(
+                            category,
+                            outgoingRepository.getTotalCategoryValueByStoreId(id, category, startDate, endDate)
+                    ));
+            }
+
             outgoingValueResponse.setStartDate(startDate);
             outgoingValueResponse.setEndDate(endDate);
-            outgoingValueResponse.setCategories(outgoingRepository.getTotalCategoryValueByStoreId(id, startDate, endDate));
+            outgoingValueResponse.setCategories(categoryValueResponses);
 
             outgoingValueResponses.add(outgoingValueResponse);
         }

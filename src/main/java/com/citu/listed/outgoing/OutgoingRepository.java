@@ -1,6 +1,5 @@
 package com.citu.listed.outgoing;
 
-import com.citu.listed.analytics.dtos.CategoryValueResponse;
 import com.citu.listed.analytics.dtos.ProductSalesResponse;
 import com.citu.listed.outgoing.enums.OutgoingCategory;
 import com.citu.listed.store.Store;
@@ -56,22 +55,20 @@ public interface OutgoingRepository extends JpaRepository<Outgoing, Integer> {
                     "WHERE DATE(outgoing.transactionDate) >= :startDate " +
                     "AND DATE(outgoing.transactionDate) <= :endDate " +
                     "AND outProduct.product.store.id = :storeId " +
-                    "AND outgoing.category != 'SALES' "
+                    "AND outgoing.category = 'SALES' "
     )
     Double getTotalRevenueByStoreId(Integer storeId, LocalDate startDate, LocalDate endDate);
 
     @Query(
-            "SELECT NEW com.citu.listed.analytics.dtos.CategoryValueResponse(outgoing.category, SUM(outgoing.price) - SUM(outProduct.revenue)) " +
+            "SELECT COALESCE(SUM(outProduct.revenue), 0) " +
                     "FROM Outgoing outgoing " +
                     "INNER JOIN outgoing.products outProduct " +
                     "WHERE outProduct.product.store.id = :storeId " +
-                    "AND outgoing.category != 'SALES' " +
+                    "AND outgoing.category = :category " +
                     "AND DATE(outgoing.transactionDate) >= :startDate " +
-                    "AND DATE(outgoing.transactionDate) <= :endDate " +
-                    "GROUP BY outgoing.category " +
-                    "ORDER BY outgoing.category DESC"
+                    "AND DATE(outgoing.transactionDate) <= :endDate "
     )
-    List<CategoryValueResponse> getTotalCategoryValueByStoreId(Integer storeId, LocalDate startDate, LocalDate endDate);
+    Double getTotalCategoryValueByStoreId(Integer storeId, OutgoingCategory category, LocalDate startDate, LocalDate endDate);
 
     @Query(
             "SELECT COALESCE(SUM(outProduct.quantity), 0) " +
@@ -85,7 +82,7 @@ public interface OutgoingRepository extends JpaRepository<Outgoing, Integer> {
     Double getTotalItemsSoldByStoreId(Integer storeId, LocalDate startDate, LocalDate endDate);
 
     @Query(
-            "SELECT NEW com.citu.listed.analytics.dtos.ProductSalesResponse(product, SUM(outProduct.quantity)) " +
+            "SELECT NEW com.citu.listed.analytics.dtos.ProductSalesResponse(product, SUM(outProduct.revenue)) " +
                     "FROM Outgoing outgoing " +
                     "INNER JOIN outgoing.products outProduct " +
                     "INNER JOIN outProduct.product product " +
@@ -94,7 +91,7 @@ public interface OutgoingRepository extends JpaRepository<Outgoing, Integer> {
                     "AND DATE(outgoing.transactionDate) >= :startDate " +
                     "AND DATE(outgoing.transactionDate) <= :endDate " +
                     "GROUP BY product " +
-                    "ORDER BY SUM(outProduct.price) DESC " +
+                    "ORDER BY SUM(outProduct.revenue) DESC " +
                     "LIMIT 10"
     )
     List<ProductSalesResponse> getTopSoldProductsByStoreId(Integer storeId, LocalDate startDate, LocalDate endDate);
@@ -110,7 +107,7 @@ public interface OutgoingRepository extends JpaRepository<Outgoing, Integer> {
     @Query(
             value = "WITH RECURSIVE DateRanges AS " +
                             "(SELECT MIN_DATE AS start_date, DATE_ADD(MIN_DATE, INTERVAL 6 DAY) AS end_date FROM " +
-                                    "(SELECT MIN(transaction_date) AS MIN_DATE, CURDATE() AS MAX_DATE " +
+                                    "(SELECT COALESCE(MIN(transaction_date), CURDATE()) AS MIN_DATE, CURDATE() AS MAX_DATE " +
                                             "FROM out_transactions " +
                                             "INNER JOIN out_products " +
                                             "ON out_transactions.id = out_products.outgoing_id " +
@@ -134,7 +131,7 @@ public interface OutgoingRepository extends JpaRepository<Outgoing, Integer> {
     @Query(
             value = "WITH RECURSIVE MonthRanges AS " +
                             "(SELECT MIN_DATE AS start_date, DATE_ADD(MIN_DATE, INTERVAL 1 MONTH) AS end_date FROM " +
-                                    "(SELECT MIN(transaction_date) AS MIN_DATE, CURDATE() AS MAX_DATE " +
+                                    "(SELECT COALESCE(MIN(transaction_date), CURDATE()) AS MIN_DATE, CURDATE() AS MAX_DATE " +
                                             "FROM out_transactions " +
                                             "INNER JOIN out_products " +
                                             "ON out_transactions.id = out_products.outgoing_id " +
