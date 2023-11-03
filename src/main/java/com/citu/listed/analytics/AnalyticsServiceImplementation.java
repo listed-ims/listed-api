@@ -1,5 +1,6 @@
 package com.citu.listed.analytics;
 
+import com.citu.listed.analytics.dtos.OutgoingValueResponse;
 import com.citu.listed.analytics.dtos.RevenueResponse;
 import com.citu.listed.analytics.dtos.SummaryResponse;
 import com.citu.listed.analytics.enums.AnalyticsPeriodicity;
@@ -52,22 +53,24 @@ public class AnalyticsServiceImplementation implements AnalyticsService{
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
 
         List<RevenueResponse> revenueResponses = new ArrayList<>();
-        List<Map<String, Object>> result =
+        List<Map<String, Object>> dateRanges =
                 periodicity == AnalyticsPeriodicity.WEEKLY
                         ? outgoingRepository.getWeeklyDateRange(id, pageable)
                         : outgoingRepository.getMonthlyDateRange(id, pageable);
 
-        for (Map<String, Object> row : result) {
+        for (Map<String, Object> dateRange : dateRanges) {
             RevenueResponse revenueResponse = new RevenueResponse();
 
-            LocalDate startDate =
-                    periodicity == AnalyticsPeriodicity.WEEKLY
-                            ? getWeekStartDate(String.valueOf(row.get("year")), String.valueOf(row.get("week")))
-                            : getYearMonthDate(String.valueOf(row.get("year")), String.valueOf(row.get("month"))).atDay(1);
-            LocalDate endDate =
-                    periodicity == AnalyticsPeriodicity.WEEKLY
-                            ? getWeekStartDate(String.valueOf(row.get("year")), String.valueOf(row.get("week"))).plusDays(6)
-                            : getYearMonthDate(String.valueOf(row.get("year")), String.valueOf(row.get("month"))).atEndOfMonth();
+            LocalDate startDate = getStartDate(
+                    periodicity,
+                    String.valueOf(dateRange.get("year")),
+                    String.valueOf(dateRange.get(periodicity == AnalyticsPeriodicity.WEEKLY ? "week" : "month"))
+            );
+            LocalDate endDate = getEndDate(
+                    periodicity,
+                    String.valueOf(dateRange.get("year")),
+                    String.valueOf(dateRange.get(periodicity == AnalyticsPeriodicity.WEEKLY ? "week" : "month"))
+            );
 
             revenueResponse.setStartDate(startDate);
             revenueResponse.setEndDate(endDate);
@@ -79,16 +82,65 @@ public class AnalyticsServiceImplementation implements AnalyticsService{
         return revenueResponses;
     }
 
-    private LocalDate getWeekStartDate(String year, String week) {
+    @Override
+    public List<OutgoingValueResponse> getOutgoingValue(
+            Integer id,
+            AnalyticsPeriodicity periodicity,
+            int pageNumber,
+            int pageSize
+    ) {
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
+        List<OutgoingValueResponse> outgoingValueResponses = new ArrayList<>();
+        List<Map<String, Object>> dateRanges =
+                periodicity == AnalyticsPeriodicity.WEEKLY
+                        ? outgoingRepository.getWeeklyDateRange(id, pageable)
+                        : outgoingRepository.getMonthlyDateRange(id, pageable);
+
+        for (Map<String, Object> dateRange : dateRanges) {
+            OutgoingValueResponse outgoingValueResponse = new OutgoingValueResponse();
+
+            LocalDate startDate = getStartDate(
+                    periodicity,
+                    String.valueOf(dateRange.get("year")),
+                    String.valueOf(dateRange.get(periodicity == AnalyticsPeriodicity.WEEKLY ? "week" : "month"))
+            );
+            LocalDate endDate = getEndDate(
+                    periodicity,
+                    String.valueOf(dateRange.get("year")),
+                    String.valueOf(dateRange.get(periodicity == AnalyticsPeriodicity.WEEKLY ? "week" : "month"))
+            );
+
+            outgoingValueResponse.setStartDate(startDate);
+            outgoingValueResponse.setEndDate(endDate);
+            outgoingValueResponse.setCategories(outgoingRepository.getTotalCategoryValueByStoreId(id, startDate, endDate));
+
+            outgoingValueResponses.add(outgoingValueResponse);
+        }
+        return outgoingValueResponses;
+    }
+
+    private LocalDate getStartDate(AnalyticsPeriodicity periodicity, String year, String weekMonth) {
         WeekFields weekFields = WeekFields.of(Locale.US);
 
-        return LocalDate.of(Integer.parseInt(year), 1, 1)
-                .with(weekFields.weekOfYear(), Integer.parseInt(week))
-                .with(DayOfWeek.SUNDAY);
+        if(periodicity == AnalyticsPeriodicity.WEEKLY)
+            return LocalDate.of(Integer.parseInt(year), 1, 1)
+                    .with(weekFields.weekOfYear(), Integer.parseInt(weekMonth))
+                    .with(DayOfWeek.SUNDAY);
+        else
+            return YearMonth.of(Integer.parseInt(year), Integer.parseInt(weekMonth))
+                    .atDay(1);
     }
 
-    private YearMonth getYearMonthDate(String year, String month) {
-        return YearMonth.of(Integer.parseInt(year), Integer.parseInt(month));
-    }
+    private LocalDate getEndDate(AnalyticsPeriodicity periodicity, String year, String weekMonth) {
+        WeekFields weekFields = WeekFields.of(Locale.US);
 
+        if(periodicity == AnalyticsPeriodicity.WEEKLY)
+            return LocalDate.of(Integer.parseInt(year), 1, 1)
+                    .with(weekFields.weekOfYear(), Integer.parseInt(weekMonth))
+                    .with(DayOfWeek.SUNDAY)
+                    .plusDays(6);
+        else
+            return YearMonth.of(Integer.parseInt(year), Integer.parseInt(weekMonth))
+                    .atEndOfMonth();
+    }
 }
