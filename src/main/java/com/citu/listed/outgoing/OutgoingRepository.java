@@ -50,21 +50,18 @@ public interface OutgoingRepository extends JpaRepository<Outgoing, Integer> {
     Long countByTransactionDate(LocalDateTime transactionDate);
 
     @Query(
-            "SELECT COALESCE(SUM(outgoing.revenue), 0) " +
+            "SELECT COALESCE(SUM(outProduct.revenue), 0) " +
                     "FROM Outgoing outgoing " +
+                    "INNER JOIN outgoing.products outProduct " +
                     "WHERE DATE(outgoing.transactionDate) >= :startDate " +
                     "AND DATE(outgoing.transactionDate) <= :endDate " +
-                    "AND outgoing.id IN " +
-                    "(SELECT DISTINCT o.id " +
-                            "FROM Outgoing o " +
-                            "JOIN o.products outProduct " +
-                            "WHERE outProduct.product.store.id = :storeId " +
-                            "AND o.category = 'SALES')"
+                    "AND outProduct.product.store.id = :storeId " +
+                    "AND outgoing.category != 'SALES' "
     )
     Double getTotalRevenueByStoreId(Integer storeId, LocalDate startDate, LocalDate endDate);
 
     @Query(
-            "SELECT NEW com.citu.listed.analytics.dtos.CategoryValueResponse(outgoing.category, SUM(outgoing.price) - SUM(outgoing.revenue)) " +
+            "SELECT NEW com.citu.listed.analytics.dtos.CategoryValueResponse(outgoing.category, SUM(outgoing.price) - SUM(outProduct.revenue)) " +
                     "FROM Outgoing outgoing " +
                     "INNER JOIN outgoing.products outProduct " +
                     "WHERE outProduct.product.store.id = :storeId " +

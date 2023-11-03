@@ -11,7 +11,6 @@ public record OutgoingResponse(
         UserResponse user,
         List<OutProduct> products,
         OutgoingCategory category,
-        Double price,
         String comment,
         LocalDateTime transactionDate,
         String referenceNumber

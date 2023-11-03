@@ -51,17 +51,14 @@ public class OutgoingServiceImplementation implements OutgoingService {
     @Transactional
     public OutgoingResponse outProducts(String token, OutgoingRequest request) {
 
-
         User user = userRepository.findByUsername(jwtService.extractUsername(token))
                 .orElseThrow(() -> new NotFoundException("User not found."));
 
         List<OutProduct> outProducts = new ArrayList<>();
 
         Double totalPrice = 0.0;
-        Double totalRevenue = 0.0;
 
         for (OutProductRequest outProduct:request.getProducts()) {
-
             if (outProduct.getQuantity() > incomingRepository.getTotalQuantityByProductId(outProduct.getProduct().getId()))
                 throw new NotFoundException("Insufficient stock.");
 
@@ -72,18 +69,9 @@ public class OutgoingServiceImplementation implements OutgoingService {
             Double price = calculatePrice(quantity, product.getSalePrice());
             Double purchasePrice = 0.0;
 
-            OutProduct newOutProduct = OutProduct.builder()
-                .product(product)
-                .quantity(quantity)
-                .price(price)
-                .build();
-
-            outProducts.add(outProductRepository.save(newOutProduct));
-            totalPrice += price;
-
             while (quantity > 0.0){
-
                 Incoming incoming;
+
                 if(request.getCategory() != OutgoingCategory.EXPIRED) {
                     incoming = incomingRepository.findFirstByActualQuantityGreaterThanAndProductId(0.0, product.getId())
                             .orElseThrow(() -> new NotFoundException("No transaction found."));
@@ -105,7 +93,15 @@ public class OutgoingServiceImplementation implements OutgoingService {
                 }
             }
 
-            totalRevenue += price - purchasePrice;
+            OutProduct newOutProduct = OutProduct.builder()
+                    .product(product)
+                    .quantity(outProduct.getQuantity())
+                    .price(price)
+                    .revenue(price - purchasePrice)
+                    .build();
+
+            outProducts.add(outProductRepository.save(newOutProduct));
+            totalPrice += price;
         }
 
         LocalDateTime transactionDate = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
@@ -115,10 +111,9 @@ public class OutgoingServiceImplementation implements OutgoingService {
                 .products(outProducts)
                 .category(request.getCategory())
                 .transactionDate(LocalDateTime.now())
-                .comment(request.getComment())
                 .price(totalPrice)
+                .comment(request.getComment())
                 .referenceNumber(getReferenceNumber(transactionDate))
-                .revenue(totalRevenue)
                 .build();
 
         outgoingRepository.save(newOutgoing);
