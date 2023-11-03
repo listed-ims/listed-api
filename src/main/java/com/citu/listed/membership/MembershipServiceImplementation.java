@@ -240,12 +240,12 @@ public class MembershipServiceImplementation implements MembershipService {
 
         membership.setMembershipStatus(membershipStatus);
         Membership updatedMembership = membershipRepository.save(membership);
-        
+
         notificationService.addNewNotification(
                 membership,
                 null,
                 null,
-                invited,
+                membership.getSender(),
                 NotificationType.INVITE_REPLY
         );
 
