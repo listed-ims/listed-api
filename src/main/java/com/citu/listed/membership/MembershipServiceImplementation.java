@@ -23,7 +23,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -158,6 +157,10 @@ public class MembershipServiceImplementation implements MembershipService {
             throw new BadRequestException("Cannot update owner membership.");
         }
 
+        if (membershipStatus == MembershipStatus.ACTIVE) {
+            throw new BadRequestException("Cannot update membership to active.");
+        }
+
         if (userPermissions != null && !userPermissions.isEmpty()) {
             if (userPermissions.contains(UserPermissions.OWNER)) {
                 throw new BadRequestException("Cannot set owner permission.");
@@ -174,12 +177,17 @@ public class MembershipServiceImplementation implements MembershipService {
 
         User user = membership.getUser();
         if (membershipStatus == MembershipStatus.DECLINED) {
-            if (Objects.equals(user.getCurrentStoreId(), membership.getStore().getId())) {
-                user.setCurrentStoreId(null);
+            Integer storeId = membership.getStore().getId();
+            if (Objects.equals(user.getCurrentStoreId(), storeId)) {
+                Store nextCurrentStore = storeRepository.
+                        findFirstByMembersUserAndIdNotAndMembersMembershipStatusNot(
+                                user,
+                                storeId,
+                                MembershipStatus.INACTIVE)
+                        .orElse(null);
+                user.setCurrentStoreId(nextCurrentStore != null ? nextCurrentStore.getId() : null);
                 userRepository.save(user);
             }
-            membership.setPermissions(new HashSet<>());
-            membership.setMembershipStatus(membershipStatus);
         } else if (membershipStatus == MembershipStatus.INACTIVE) {
             Integer storeId = membership.getStore().getId();
             if (Objects.equals(user.getCurrentStoreId(), storeId)) {
@@ -200,16 +208,45 @@ public class MembershipServiceImplementation implements MembershipService {
         membership.setMembershipStatus(membershipStatus);
         Membership updatedMembership = membershipRepository.save(membership);
 
+        if (membershipStatus != MembershipStatus.DECLINED)
+            notificationService.addNewNotification(
+                    membership,
+                    null,
+                    null,
+                    updatedMembership.getSender(),
+                    membershipStatus == MembershipStatus.INACTIVE
+                            ? NotificationType.COLLABORATOR_REMOVAL
+                            : NotificationType.STORE_INVITE
+            );
+
+        return membershipResponseMapper.apply(updatedMembership);
+    }
+
+    @Override
+    public MembershipResponse acceptOrDeclineMembership(
+            String token,
+            Integer id,
+            MembershipStatus membershipStatus
+    ) {
+        User invited = userRepository.findByUsername(jwtService.extractUsername(token))
+                .orElseThrow(() -> new NotFoundException("User not found."));
+
+        Membership membership = membershipRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Membership does not exist."));
+
+        if (membership.getUser() != invited) {
+            throw new BadRequestException("Cannot accept or decline other's membership.");
+        }
+
+        membership.setMembershipStatus(membershipStatus);
+        Membership updatedMembership = membershipRepository.save(membership);
+        
         notificationService.addNewNotification(
                 membership,
                 null,
                 null,
-                updatedMembership.getSender(),
-                membershipStatus == MembershipStatus.INACTIVE
-                        ? NotificationType.COLLABORATOR_REMOVAL
-                        : membershipStatus == MembershipStatus.PENDING
-                        ? NotificationType.STORE_INVITE
-                        : NotificationType.INVITE_REPLY
+                invited,
+                NotificationType.INVITE_REPLY
         );
 
         return membershipResponseMapper.apply(updatedMembership);

@@ -68,6 +68,19 @@ public class MembershipController {
         return new ResponseEntity<>(membershipService.getMembership(token, storeId), HttpStatus.OK);
     }
 
+    @PutMapping("/membership/{id}")
+    public ResponseEntity<MembershipResponse> acceptOrDeclineMembership(
+            @RequestHeader HttpHeaders headers,
+            @PathVariable Integer id,
+            @RequestParam MembershipStatus membershipStatus
+    ) {
+        String token = headers.getFirst(HttpHeaders.AUTHORIZATION).substring(7);
+        return new ResponseEntity<>(
+                membershipService.acceptOrDeclineMembership(token, id, membershipStatus),
+                HttpStatus.OK
+        );
+    }
+
     @PreAuthorize("@MethodSecurity.hasAnyPermission(" +
             "'UPDATE_COLLABORATOR', " +
             "'DELETE_COLLABORATOR')")
