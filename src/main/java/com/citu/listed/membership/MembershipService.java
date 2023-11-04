@@ -27,5 +27,11 @@ public interface MembershipService {
             MembershipStatus membershipStatus
     );
 
+    MembershipResponse acceptOrDeclineMembership(
+            String token,
+            Integer id,
+            MembershipStatus membershipStatus
+    );
+
     MembershipResponse getMembership(String token, Integer storeId);
 }
