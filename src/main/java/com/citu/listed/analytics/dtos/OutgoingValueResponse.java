@@ -13,5 +13,6 @@ import java.util.List;
 public class OutgoingValueResponse {
     private LocalDate startDate;
     private LocalDate endDate;
-    List<CategoryValueResponse> categories;
+    private List<CategoryValueResponse> categories;
+    private int totalPages;
 }

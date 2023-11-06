@@ -56,6 +56,10 @@ public class AnalyticsServiceImplementation implements AnalyticsService{
                 periodicity == AnalyticsPeriodicity.WEEKLY
                         ? outgoingRepository.getWeeklyDateRange(id, pageable)
                         : outgoingRepository.getMonthlyDateRange(id, pageable);
+        int totalPages =
+                periodicity == AnalyticsPeriodicity.WEEKLY
+                        ? (int) Math.ceil(outgoingRepository.getWeeklyDateRange(id).toArray().length / (double) pageSize)
+                        : (int) Math.ceil(outgoingRepository.getMonthlyDateRange(id).toArray().length / (double) pageSize);
 
         for (Map<String, Object> dateRange : dateRanges) {
             RevenueResponse revenueResponse = new RevenueResponse();
@@ -74,6 +78,7 @@ public class AnalyticsServiceImplementation implements AnalyticsService{
             revenueResponse.setStartDate(startDate);
             revenueResponse.setEndDate(endDate);
             revenueResponse.setRevenue(outgoingRepository.getTotalRevenueByStoreId(id, startDate, endDate));
+            revenueResponse.setTotalPages(totalPages);
 
             revenueResponses.add(revenueResponse);
         }
@@ -89,11 +94,16 @@ public class AnalyticsServiceImplementation implements AnalyticsService{
             int pageSize
     ) {
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
+
         List<TopProductResponse> topProductResponses = new ArrayList<>();
         List<Map<String, Object>> dateRanges =
                 periodicity == AnalyticsPeriodicity.WEEKLY
                         ? outgoingRepository.getWeeklyDateRange(id, pageable)
                         : outgoingRepository.getMonthlyDateRange(id, pageable);
+        int totalPages =
+                periodicity == AnalyticsPeriodicity.WEEKLY
+                        ? (int) Math.ceil(outgoingRepository.getWeeklyDateRange(id).toArray().length / (double) pageSize)
+                        : (int) Math.ceil(outgoingRepository.getMonthlyDateRange(id).toArray().length / (double) pageSize);
 
         for (Map<String, Object> dateRange : dateRanges) {
             TopProductResponse topProductResponse = new TopProductResponse();
@@ -112,6 +122,7 @@ public class AnalyticsServiceImplementation implements AnalyticsService{
             topProductResponse.setStartDate(startDate);
             topProductResponse.setEndDate(endDate);
             topProductResponse.setProducts(outgoingRepository.getTopSoldProductsByStoreId(id, startDate, endDate));
+            topProductResponse.setTotalPages(totalPages);
 
             topProductResponses.add(topProductResponse);
         }
@@ -126,11 +137,16 @@ public class AnalyticsServiceImplementation implements AnalyticsService{
             int pageSize
     ) {
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
+
         List<OutgoingValueResponse> outgoingValueResponses = new ArrayList<>();
         List<Map<String, Object>> dateRanges =
                 periodicity == AnalyticsPeriodicity.WEEKLY
                         ? outgoingRepository.getWeeklyDateRange(id, pageable)
                         : outgoingRepository.getMonthlyDateRange(id, pageable);
+        int totalPages =
+                periodicity == AnalyticsPeriodicity.WEEKLY
+                        ? (int) Math.ceil(outgoingRepository.getWeeklyDateRange(id).toArray().length / (double) pageSize)
+                        : (int) Math.ceil(outgoingRepository.getMonthlyDateRange(id).toArray().length / (double) pageSize);
 
         for (Map<String, Object> dateRange : dateRanges) {
             OutgoingValueResponse outgoingValueResponse = new OutgoingValueResponse();
@@ -158,6 +174,7 @@ public class AnalyticsServiceImplementation implements AnalyticsService{
             outgoingValueResponse.setStartDate(startDate);
             outgoingValueResponse.setEndDate(endDate);
             outgoingValueResponse.setCategories(categoryValueResponses);
+            outgoingValueResponse.setTotalPages(totalPages);
 
             outgoingValueResponses.add(outgoingValueResponse);
         }

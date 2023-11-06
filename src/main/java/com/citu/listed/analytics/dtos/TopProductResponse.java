@@ -14,4 +14,5 @@ public class TopProductResponse {
     private LocalDate startDate;
     private LocalDate endDate;
     private List<ProductSalesResponse> products;
+    private int totalPages;
 }

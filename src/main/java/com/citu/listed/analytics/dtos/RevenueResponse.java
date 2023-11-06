@@ -13,4 +13,5 @@ public class RevenueResponse {
     private LocalDate startDate;
     private LocalDate endDate;
     private Double revenue;
+    private int totalPages;
 }

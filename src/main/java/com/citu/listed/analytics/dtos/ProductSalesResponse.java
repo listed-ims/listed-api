@@ -11,4 +11,5 @@ import lombok.*;
 public class ProductSalesResponse {
     private Product product;
     private Double totalSales;
+    private Double totalUnitSold;
 }

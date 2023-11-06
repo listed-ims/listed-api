@@ -82,7 +82,7 @@ public interface OutgoingRepository extends JpaRepository<Outgoing, Integer> {
     Double getTotalItemsSoldByStoreId(Integer storeId, LocalDate startDate, LocalDate endDate);
 
     @Query(
-            "SELECT NEW com.citu.listed.analytics.dtos.ProductSalesResponse(product, SUM(outProduct.revenue)) " +
+            "SELECT NEW com.citu.listed.analytics.dtos.ProductSalesResponse(product, SUM(outProduct.revenue), SUM(outProduct.quantity)) " +
                     "FROM Outgoing outgoing " +
                     "INNER JOIN outgoing.products outProduct " +
                     "INNER JOIN outProduct.product product " +
@@ -151,4 +151,56 @@ public interface OutgoingRepository extends JpaRepository<Outgoing, Integer> {
             nativeQuery = true
     )
     List<Map<String, Object>> getMonthlyDateRange(Integer storeId, Pageable pageable);
+
+    @Query(
+            value = "WITH RECURSIVE DateRanges AS " +
+                        "(SELECT MIN_DATE AS start_date, DATE_ADD(MIN_DATE, INTERVAL 6 DAY) AS end_date FROM " +
+                                "(SELECT COALESCE(MIN(transaction_date), CURDATE()) AS MIN_DATE, CURDATE() AS MAX_DATE " +
+                                        "FROM out_transactions " +
+                                        "INNER JOIN out_products " +
+                                        "ON out_transactions.id = out_products.outgoing_id " +
+                                        "INNER JOIN products " +
+                                        "ON products.id = out_products.product_id " +
+                                        "WHERE products.store_id = :storeId) AS date_range " +
+                                        "UNION ALL " +
+                                        "SELECT DATE_ADD(end_date, INTERVAL 1 DAY), DATE_ADD(end_date, INTERVAL 7 DAY) " +
+                                        "FROM DateRanges " +
+                                        "WHERE end_date <= CURDATE()) " +
+
+                    "SELECT YEAR(start_date) AS year, LPAD(WEEK(start_date, 1), 2, '0') AS week " +
+                                "FROM DateRanges " +
+                                "LEFT JOIN out_transactions ON " +
+                                "transaction_date >= start_date AND transaction_date <= end_date " +
+                                "GROUP BY year, week " +
+                                "ORDER BY year DESC, week DESC",
+            nativeQuery = true
+    )
+    List<Map<String, Object>> getWeeklyDateRange(Integer storeId);
+
+    @Query(
+            value = "WITH RECURSIVE MonthRanges AS " +
+                            "(SELECT MIN_DATE AS start_date, DATE_ADD(MIN_DATE, INTERVAL 1 MONTH) AS end_date FROM " +
+                                    "(SELECT COALESCE(MIN(transaction_date), CURDATE()) AS MIN_DATE, CURDATE() AS MAX_DATE " +
+                                    "FROM out_transactions " +
+                                            "INNER JOIN out_products " +
+                                            "ON out_transactions.id = out_products.outgoing_id " +
+                                            "INNER JOIN products " +
+                                            "ON products.id = out_products.product_id " +
+                                            "WHERE products.store_id = :storeId) AS date_range " +
+                                            "UNION ALL " +
+                                            "SELECT DATE_ADD(end_date, INTERVAL 1 DAY), DATE_ADD(DATE_ADD(end_date, INTERVAL 1 MONTH), INTERVAL 1 DAY) " +
+                                            "FROM MonthRanges " +
+                                            "WHERE YEAR(end_date) * 100 + MONTH(end_date) <= YEAR(CURDATE()) * 100 + MONTH(CURDATE())) " +
+                            "SELECT YEAR(start_date) AS year, LPAD(MONTH(start_date), 2, '0') AS month " +
+                                    "FROM MonthRanges " +
+                                    "LEFT JOIN out_transactions ON " +
+                                    "transaction_date >= start_date AND transaction_date < end_date " +
+                                    "GROUP BY year, month " +
+                                    "ORDER BY year DESC, month DESC",
+            nativeQuery = true
+    )
+    List<Map<String, Object>> getMonthlyDateRange(Integer storeId);
+
+
+
 }
