@@ -1,6 +1,7 @@
 package com.citu.listed.analytics;
 
-import com.citu.listed.analytics.dtos.SummaryResponse;
+import com.citu.listed.analytics.dtos.*;
+import com.citu.listed.analytics.enums.AnalyticsPeriodicity;
 import com.citu.listed.incoming.IncomingRepository;
 import com.citu.listed.outgoing.OutgoingRepository;
 import com.citu.listed.outgoing.enums.OutgoingCategory;
@@ -9,9 +10,15 @@ import com.citu.listed.shared.exception.NotFoundException;
 import com.citu.listed.store.Store;
 import com.citu.listed.store.StoreRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.temporal.WeekFields;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -30,8 +37,172 @@ public class AnalyticsServiceImplementation implements AnalyticsService{
         return new SummaryResponse(
                 productRepository.countLowStockProductsByStoreId(store.getId()),
                 incomingRepository.getTotalNearExpiryItemsByStoreId(store.getId(), LocalDate.now().plusDays(14)),
-                outgoingRepository.getTotalRevenueByStoreId(store.getId(), OutgoingCategory.SALES, LocalDate.now(), LocalDate.now()),
-                outgoingRepository.getTotalItemsSoldByStoreId(store.getId(), OutgoingCategory.SALES, LocalDate.now(), LocalDate.now())
+                outgoingRepository.getTotalRevenueByStoreId(store.getId(), LocalDate.now(), LocalDate.now()),
+                outgoingRepository.getTotalItemsSoldByStoreId(store.getId(), LocalDate.now(), LocalDate.now())
         );
+    }
+
+    @Override
+    public List<RevenueResponse> getRevenue(
+            Integer id,
+            AnalyticsPeriodicity periodicity,
+            int pageNumber,
+            int pageSize
+    ) {
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
+
+        List<RevenueResponse> revenueResponses = new ArrayList<>();
+        List<Map<String, Object>> dateRanges =
+                periodicity == AnalyticsPeriodicity.WEEKLY
+                        ? outgoingRepository.getWeeklyDateRange(id, pageable)
+                        : outgoingRepository.getMonthlyDateRange(id, pageable);
+        int totalPages =
+                periodicity == AnalyticsPeriodicity.WEEKLY
+                        ? (int) Math.ceil(outgoingRepository.getWeeklyDateRange(id).toArray().length / (double) pageSize)
+                        : (int) Math.ceil(outgoingRepository.getMonthlyDateRange(id).toArray().length / (double) pageSize);
+
+        for (Map<String, Object> dateRange : dateRanges) {
+            RevenueResponse revenueResponse = new RevenueResponse();
+
+            LocalDate startDate = getStartDate(
+                    periodicity,
+                    String.valueOf(dateRange.get("year")),
+                    String.valueOf(dateRange.get(periodicity == AnalyticsPeriodicity.WEEKLY ? "week" : "month"))
+            );
+            LocalDate endDate = getEndDate(
+                    periodicity,
+                    String.valueOf(dateRange.get("year")),
+                    String.valueOf(dateRange.get(periodicity == AnalyticsPeriodicity.WEEKLY ? "week" : "month"))
+            );
+
+            revenueResponse.setStartDate(startDate);
+            revenueResponse.setEndDate(endDate);
+            revenueResponse.setRevenue(outgoingRepository.getTotalRevenueByStoreId(id, startDate, endDate));
+            revenueResponse.setTotalPages(totalPages);
+
+            revenueResponses.add(revenueResponse);
+        }
+
+        return revenueResponses;
+    }
+
+    @Override
+    public List<TopProductResponse> getTopProducts(
+            Integer id,
+            AnalyticsPeriodicity periodicity,
+            int pageNumber,
+            int pageSize
+    ) {
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
+
+        List<TopProductResponse> topProductResponses = new ArrayList<>();
+        List<Map<String, Object>> dateRanges =
+                periodicity == AnalyticsPeriodicity.WEEKLY
+                        ? outgoingRepository.getWeeklyDateRange(id, pageable)
+                        : outgoingRepository.getMonthlyDateRange(id, pageable);
+        int totalPages =
+                periodicity == AnalyticsPeriodicity.WEEKLY
+                        ? (int) Math.ceil(outgoingRepository.getWeeklyDateRange(id).toArray().length / (double) pageSize)
+                        : (int) Math.ceil(outgoingRepository.getMonthlyDateRange(id).toArray().length / (double) pageSize);
+
+        for (Map<String, Object> dateRange : dateRanges) {
+            TopProductResponse topProductResponse = new TopProductResponse();
+
+            LocalDate startDate = getStartDate(
+                    periodicity,
+                    String.valueOf(dateRange.get("year")),
+                    String.valueOf(dateRange.get(periodicity == AnalyticsPeriodicity.WEEKLY ? "week" : "month"))
+            );
+            LocalDate endDate = getEndDate(
+                    periodicity,
+                    String.valueOf(dateRange.get("year")),
+                    String.valueOf(dateRange.get(periodicity == AnalyticsPeriodicity.WEEKLY ? "week" : "month"))
+            );
+
+            topProductResponse.setStartDate(startDate);
+            topProductResponse.setEndDate(endDate);
+            topProductResponse.setProducts(outgoingRepository.getTopSoldProductsByStoreId(id, startDate, endDate));
+            topProductResponse.setTotalPages(totalPages);
+
+            topProductResponses.add(topProductResponse);
+        }
+        return topProductResponses;
+    }
+
+    @Override
+    public List<OutgoingValueResponse> getOutgoingValue(
+            Integer id,
+            AnalyticsPeriodicity periodicity,
+            int pageNumber,
+            int pageSize
+    ) {
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
+
+        List<OutgoingValueResponse> outgoingValueResponses = new ArrayList<>();
+        List<Map<String, Object>> dateRanges =
+                periodicity == AnalyticsPeriodicity.WEEKLY
+                        ? outgoingRepository.getWeeklyDateRange(id, pageable)
+                        : outgoingRepository.getMonthlyDateRange(id, pageable);
+        int totalPages =
+                periodicity == AnalyticsPeriodicity.WEEKLY
+                        ? (int) Math.ceil(outgoingRepository.getWeeklyDateRange(id).toArray().length / (double) pageSize)
+                        : (int) Math.ceil(outgoingRepository.getMonthlyDateRange(id).toArray().length / (double) pageSize);
+
+        for (Map<String, Object> dateRange : dateRanges) {
+            OutgoingValueResponse outgoingValueResponse = new OutgoingValueResponse();
+            List<CategoryValueResponse> categoryValueResponses = new ArrayList<>();
+
+            LocalDate startDate = getStartDate(
+                    periodicity,
+                    String.valueOf(dateRange.get("year")),
+                    String.valueOf(dateRange.get(periodicity == AnalyticsPeriodicity.WEEKLY ? "week" : "month"))
+            );
+            LocalDate endDate = getEndDate(
+                    periodicity,
+                    String.valueOf(dateRange.get("year")),
+                    String.valueOf(dateRange.get(periodicity == AnalyticsPeriodicity.WEEKLY ? "week" : "month"))
+            );
+
+            for(OutgoingCategory category: OutgoingCategory.values()) {
+                if(category != OutgoingCategory.SALES)
+                    categoryValueResponses.add(new CategoryValueResponse(
+                            category,
+                            outgoingRepository.getTotalCategoryValueByStoreId(id, category, startDate, endDate)
+                    ));
+            }
+
+            outgoingValueResponse.setStartDate(startDate);
+            outgoingValueResponse.setEndDate(endDate);
+            outgoingValueResponse.setCategories(categoryValueResponses);
+            outgoingValueResponse.setTotalPages(totalPages);
+
+            outgoingValueResponses.add(outgoingValueResponse);
+        }
+        return outgoingValueResponses;
+    }
+
+    private LocalDate getStartDate(AnalyticsPeriodicity periodicity, String year, String weekMonth) {
+        WeekFields weekFields = WeekFields.of(Locale.US);
+
+        if(periodicity == AnalyticsPeriodicity.WEEKLY)
+            return LocalDate.of(Integer.parseInt(year), 1, 1)
+                    .with(weekFields.weekOfYear(), Integer.parseInt(weekMonth))
+                    .with(DayOfWeek.SUNDAY);
+        else
+            return YearMonth.of(Integer.parseInt(year), Integer.parseInt(weekMonth))
+                    .atDay(1);
+    }
+
+    private LocalDate getEndDate(AnalyticsPeriodicity periodicity, String year, String weekMonth) {
+        WeekFields weekFields = WeekFields.of(Locale.US);
+
+        if(periodicity == AnalyticsPeriodicity.WEEKLY)
+            return LocalDate.of(Integer.parseInt(year), 1, 1)
+                    .with(weekFields.weekOfYear(), Integer.parseInt(weekMonth))
+                    .with(DayOfWeek.SUNDAY)
+                    .plusDays(6);
+        else
+            return YearMonth.of(Integer.parseInt(year), Integer.parseInt(weekMonth))
+                    .atEndOfMonth();
     }
 }

@@ -30,10 +30,14 @@ public class OutProduct {
     @Column
     private Double price;
 
+    @Column
+    private Double revenue;
+
     @Builder
-    public OutProduct(Product product, Double quantity, Double price) {
+    public OutProduct(Product product, Double quantity, Double price, Double revenue) {
         this.product = product;
         this.quantity = quantity;
         this.price = price;
+        this.revenue = revenue;
     }
 }

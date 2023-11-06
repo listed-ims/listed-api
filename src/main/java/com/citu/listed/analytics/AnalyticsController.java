@@ -1,5 +1,6 @@
 package com.citu.listed.analytics;
 
+import com.citu.listed.analytics.enums.AnalyticsPeriodicity;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,5 +19,35 @@ public class AnalyticsController {
     @GetMapping("/summary")
     public ResponseEntity<Object> getSummary(@RequestParam Integer storeId) {
         return new ResponseEntity<>(analyticsService.getSummary(storeId), HttpStatus.OK);
+    }
+
+    @GetMapping("/revenue")
+    public ResponseEntity<Object> getRevenue(
+            @RequestParam Integer storeId,
+            @RequestParam AnalyticsPeriodicity periodicity,
+            @RequestParam(defaultValue = "1") int pageNumber,
+            @RequestParam(defaultValue = "6") int pageSize
+    ) {
+        return new ResponseEntity<>(analyticsService.getRevenue(storeId, periodicity, pageNumber, pageSize), HttpStatus.OK);
+    }
+
+    @GetMapping("/top-products")
+    public ResponseEntity<Object> getTopProducts(
+            @RequestParam Integer storeId,
+            @RequestParam AnalyticsPeriodicity periodicity,
+            @RequestParam(defaultValue = "1") int pageNumber,
+            @RequestParam(defaultValue = "1") int pageSize
+    ) {
+        return new ResponseEntity<>(analyticsService.getTopProducts(storeId, periodicity, pageNumber, pageSize), HttpStatus.OK);
+    }
+
+    @GetMapping("/outgoing-value")
+    public ResponseEntity<Object> getOugoingValue(
+            @RequestParam Integer storeId,
+            @RequestParam AnalyticsPeriodicity periodicity,
+            @RequestParam(defaultValue = "1") int pageNumber,
+            @RequestParam(defaultValue = "1") int pageSize
+    ) {
+        return new ResponseEntity<>(analyticsService.getOutgoingValue(storeId, periodicity, pageNumber, pageSize), HttpStatus.OK);
     }
 }
