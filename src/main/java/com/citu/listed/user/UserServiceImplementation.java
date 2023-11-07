@@ -55,6 +55,17 @@ public class UserServiceImplementation implements UserService {
         }
     }
 
+    private void revokeAllUserTokens(User user){
+        var validUserTokens = tokenRepository.findAllValidTokensByUser(user.getId());
+                if(validUserTokens.isEmpty())
+                    return;
+                validUserTokens.forEach(t -> {
+                    t.setExpired(true);
+                    t.setRevoked(true);
+                });
+                tokenRepository.saveAll(validUserTokens);
+    }
+
     private void savedUserToken(User user, String jwtToken) {
         var token = Token.builder()
                 .user(user)
@@ -76,6 +87,7 @@ public class UserServiceImplementation implements UserService {
         var user = userRepository.findByUsername(request.getUsername())
                 .orElse(null);
         var jwtToken = jwtService.generateToken(user);
+        revokeAllUserTokens(user);
         savedUserToken(user, jwtToken);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
