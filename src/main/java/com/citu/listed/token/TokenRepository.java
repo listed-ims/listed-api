@@ -2,7 +2,6 @@ package com.citu.listed.token;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -14,8 +13,5 @@ public interface TokenRepository extends JpaRepository<Token, Integer> {
     """)
     List<Token> findAllValidTokensByUser(Integer userId);
 
-//    @Query("""
-//
-//    """)
     Optional<Token> findByToken(String token);
 }
