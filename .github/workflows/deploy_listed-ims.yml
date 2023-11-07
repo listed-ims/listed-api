@@ -12,7 +12,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    env:
+      MYSQL_CONNECTION_STRING: ${{ secrets.MYSQL_CONNECTION_STRING }}
+      MYSQL_USER: ${{ secrets.MYSQL_USER }}
+      MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+      TOKEN_SIGNING_KEY: ${{ secrets.TOKEN_SIGNING_KEY }}
+    
     steps:
       - uses: actions/checkout@v4
 
