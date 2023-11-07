@@ -1,6 +1,7 @@
 package com.citu.listed.user;
 
 import com.citu.listed.membership.Membership;
+import com.citu.listed.token.Token;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -34,6 +35,9 @@ public class User implements UserDetails{
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     private Set<Membership> memberships;
+
+    @OneToMany(mappedBy = "user")
+    private List<Token> tokens;
 
     @Builder
     public User(String name, String username, String password) {

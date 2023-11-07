@@ -5,6 +5,9 @@ import com.citu.listed.shared.exception.BadRequestException;
 import com.citu.listed.shared.exception.NotFoundException;
 import com.citu.listed.store.Store;
 import com.citu.listed.store.StoreRepository;
+import com.citu.listed.token.Token;
+import com.citu.listed.token.TokenRepository;
+import com.citu.listed.token.TokenType;
 import com.citu.listed.user.config.JwtService;
 import com.citu.listed.user.dtos.AuthenticationRequest;
 import com.citu.listed.user.dtos.AuthenticationResponse;
@@ -27,6 +30,7 @@ public class UserServiceImplementation implements UserService {
 
     private final UserDetailsService userDetailsService;
     private final UserRepository userRepository;
+    private final TokenRepository tokenRepository;
     private final StoreRepository storeRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
@@ -40,14 +44,26 @@ public class UserServiceImplementation implements UserService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .build();
         if (validateUsername(user.getUsername())) {
-            userRepository.save(user);
+            var savedUser = userRepository.save(user);
             var jwtToken = jwtService.generateToken(user);
+            savedUserToken(savedUser, jwtToken);
             return AuthenticationResponse.builder()
                     .token(jwtToken)
                     .build();
         } else {
             throw new BadRequestException("Username is already taken.");
         }
+    }
+
+    private void savedUserToken(User user, String jwtToken) {
+        var token = Token.builder()
+                .user(user)
+                .token(jwtToken)
+                .tokenType(TokenType.BEARER)
+                .expired(false)
+                .revoked(false)
+                .build();
+        tokenRepository.save(token);
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
@@ -60,6 +76,7 @@ public class UserServiceImplementation implements UserService {
         var user = userRepository.findByUsername(request.getUsername())
                 .orElse(null);
         var jwtToken = jwtService.generateToken(user);
+        savedUserToken(user, jwtToken);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .build();
